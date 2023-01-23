@@ -1,0 +1,43 @@
+#pragma once
+#include <cstdint>
+
+namespace mce {
+    enum class TextureFormat : uint32_t {
+        UNKNOWN_TEXTURE_FORMAT = 0x0,
+        R32G32B32A32_FLOAT = 0x2,
+        R16G16B16A16_FLOAT = 0xA,
+        R16G16B16A16_UNORM = 0xB,
+        R32G32_FLOAT = 0x10,
+        R10G10B10A2_UNORM = 0x18,
+        R11G11B10_FLOAT = 0x1A,
+        R8G8B8A8_UNORM = 0x1C,
+        R8G8B8A8_UNORM_SRGB = 0x1D,
+        R16G16_FLOAT = 0x22,
+        R16G16_UNORM = 0x23,
+        R16G16_UINT = 0x24,
+        R16G16_SNORM = 0x25,
+        D32_FLOAT = 0x28,
+        R32_FLOAT = 0x29,
+        R32_UINT = 0x2A,
+        R24G8_TYPELESS = 0x2C,
+        D24_UNORM_S8_UINT = 0x2D,
+        R24_UNORM_X8_TYPELESS = 0x2E,
+        R8G8_UNORM = 0x31,
+        R8G8_SNORM = 0x33,
+        R16_FLOAT = 0x36,
+        D16_UNORM = 0x37,
+        R8_UNORM = 0x3D,
+        R8_UINT = 0x3E,
+        A8_UNORM = 0x41,
+        BC3_UNORM = 0x4D,
+        R5G6B5_UNORM = 0x55,
+        R5G5B5A1_UNORM = 0x56,
+        B8G8R8A8_UNORM = 0x57,
+        B8G8R8A8_UNORM_SRGB = 0x5B,
+        BC7_UNORM = 0x62,
+        R4G4B4A4_UNORM = 0x73,
+        S8_UINT = 0x74,
+        R8G8B8_UNORM = 0x75,
+        COMPRESSED = 0x76,
+    };
+}
