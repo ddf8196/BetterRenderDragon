@@ -51,6 +51,7 @@ HRESULT D3D12CreateDeviceHook(_In_opt_ IUnknown* pAdapter, D3D_FEATURE_LEVEL Min
 	if (hook) {
 		ReplaceVtable(*(void**)device, 13, (void**)&Original_ID3D12Device_CheckFeatureSupport, ID3D12Device_CheckFeatureSupportHook);
 		ReplaceVtable(*(void**)device, 18, (void**)&Original_ID3D12Device_CreateShaderResourceView, ID3D12Device_CreateShaderResourceViewHook);
+		ReplaceVtable(*(void**)device, 27, (void**)&Original_ID3D12Device_CreateCommittedResource, ID3D12Device_CreateCommittedResourceHook);
 		ReplaceVtable(*(void**)device, 29, (void**)&Original_ID3D12Device_CreatePlacedResource, ID3D12Device_CreatePlacedResourceHook);
 	} else {
 		UnhookFunction(Original_D3D12CreateDevice, D3D12CreateDeviceHook);
@@ -83,19 +84,30 @@ void STDMETHODCALLTYPE ID3D12Device_CreateShaderResourceViewHook(ID3D12Device* s
 	if (pDesc->ViewDimension != D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE) {
 		Original_ID3D12Device_CreateShaderResourceView(self, pResource, pDesc, DestDescriptor);
 	} else {
-		D3D12_SHADER_RESOURCE_VIEW_DESC desc;
-		desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-		desc.Buffer.FirstElement = 0;
-		desc.Buffer.NumElements = 1;
-		desc.Buffer.StructureByteStride = 1;
-		desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-		Original_ID3D12Device_CreateShaderResourceView(self, pResource, &desc, DestDescriptor);
+		printf("%s ViewDimension=%d\n", __FUNCTION__, pDesc->ViewDimension);
+		D3D12_SHADER_RESOURCE_VIEW_DESC* desc = (D3D12_SHADER_RESOURCE_VIEW_DESC*)pDesc;
+		desc->ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		desc->Buffer.FirstElement = 0;
+		desc->Buffer.NumElements = 1;
+		desc->Buffer.StructureByteStride = 1;
+		desc->Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		Original_ID3D12Device_CreateShaderResourceView(self, pResource, desc, DestDescriptor);
 	}
+}
+
+PFN_ID3D12Device_CreateCommittedResource Original_ID3D12Device_CreateCommittedResource;
+HRESULT ID3D12Device_CreateCommittedResourceHook(ID3D12Device* self, const D3D12_HEAP_PROPERTIES* pHeapProperties, D3D12_HEAP_FLAGS HeapFlags, const D3D12_RESOURCE_DESC* pDesc, D3D12_RESOURCE_STATES InitialResourceState, const D3D12_CLEAR_VALUE* pOptimizedClearValue, REFIID riidResource, void** ppvResource) {
+	if (InitialResourceState == D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE) {
+		printf("%s InitialResourceState=%d\n", __FUNCTION__, InitialResourceState);
+		InitialResourceState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+	}
+	return Original_ID3D12Device_CreateCommittedResource(self, pHeapProperties, HeapFlags, pDesc, InitialResourceState, pOptimizedClearValue, riidResource, ppvResource);;
 }
 
 PFN_ID3D12Device_CreatePlacedResource Original_ID3D12Device_CreatePlacedResource;
 HRESULT ID3D12Device_CreatePlacedResourceHook(ID3D12Device* self, ID3D12Heap* pHeap, UINT64 HeapOffset, const D3D12_RESOURCE_DESC* pDesc, D3D12_RESOURCE_STATES InitialState, const D3D12_CLEAR_VALUE* pOptimizedClearValue, REFIID riid, void** ppvResource) {
 	if (InitialState == D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE) {
+		printf("%s InitialState=%d\n", __FUNCTION__, InitialState);
 		InitialState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 	}
 	return Original_ID3D12Device_CreatePlacedResource(self, pHeap, HeapOffset, pDesc, InitialState, pOptimizedClearValue, riid, ppvResource);
