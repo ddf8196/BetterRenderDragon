@@ -32,6 +32,9 @@ void MCHooks_Init() {
 	if (!isRayTracingAvailablePtr) {
 		isRayTracingAvailablePtr = FindSignature("40 53 48 83 EC 20 48 8B 01 48 8B D9 48 8B 40 08 ?? ?? ?? ?? ?? ?? 84 C0 74 30 48 8B 03 48 8B CB 48 8B 40 10 ?? ?? ?? ?? ?? ?? 84 C0 74 1C 48 8B 03 48 8B CB 48 8B 40 18 ?? ?? ?? ?? ?? ?? 84 C0 74 08 B0 01 48 83 C4 20 5B C3 32 C0 48 83 C4 20 5B C3");
 	}
+	if (!isRayTracingAvailablePtr) {
+		isRayTracingAvailablePtr = FindSignature("40 53 48 83 EC 20 48 8B 01 48 8B D9 48 8B 40 08 ?? ?? ?? ?? ?? ?? 84 C0 74 30 48 8B 03 48 8B CB 48 8B 40 28 ?? ?? ?? ?? ?? ?? 84 C0 74 1C 48 8B 03 48 8B CB 48 8B 40 10 ?? ?? ?? ?? ?? ?? 84 C0 74 08 B0 01 48 83 C4 20 5B C3 32 C0 48 83 C4 20 5B C3 ");
+	}
 	if (isRayTracingAvailablePtr) {
 		Hook(RayTracingOptions_isRayTracingAvailable, (void*)isRayTracingAvailablePtr);
 	} else {
