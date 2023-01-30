@@ -15,4 +15,16 @@ void MCPatches_Init() {
 	} else {
 		printf("Failed to patch bgfx::d3d12rtx::RendererContextD3D12RTX::init\n");
 	}
+
+	//bgfx::d3d12::RendererContextD3D12::init
+	uintptr_t ptr2 = FindSignature("81 BF ?? ?? 00 00 86 80 00 00");
+	if (ptr2) {
+		DWORD oldProtect, tmp;
+		VirtualProtect((void*)ptr2, 10, PAGE_READWRITE, &oldProtect);
+		((char*)ptr2)[6] = 0;
+		((char*)ptr2)[7] = 0;
+		VirtualProtect((void*)ptr2, 10, oldProtect, &tmp);
+	} else {
+		printf("Failed to patch bgfx::d3d12::RendererContextD3D12::init\n");
+	}
 }
