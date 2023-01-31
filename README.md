@@ -1,5 +1,5 @@
 # RTX2Deferred
-开启MCBE Windows 1.19.40及以上版本中的延迟渲染功能
+在MCBE Windows 1.19.40及以上版本中开启延迟渲染
 
 ## 使用
 1. 安装MCBE 1.19.40及以上版本
