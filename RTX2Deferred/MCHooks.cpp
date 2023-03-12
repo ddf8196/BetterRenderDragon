@@ -1,6 +1,8 @@
 #include "HookAPI.h"
 #include "MCHooks.h"
 
+int setLightingModelIndex = 8;
+
 void (*RayTracingOptions_setLightingModel)(void* self, int lightingModel) = nullptr;
 void RayTracingOptions_setLightingModel_Hook(void* self, int lightingModel) {
 	if (lightingModel == 2) { //RTX
@@ -14,7 +16,7 @@ DeclareHook(RayTracingOptions_isRayTracingAvailable, bool, void* self) {
 	bool result = original(self);
 
 	Unhook(RayTracingOptions_isRayTracingAvailable);
-	ReplaceVtable(*(void**)self, 8, (void**)&RayTracingOptions_setLightingModel, RayTracingOptions_setLightingModel_Hook);
+	ReplaceVtable(*(void**)self, setLightingModelIndex, (void**)&RayTracingOptions_setLightingModel, RayTracingOptions_setLightingModel_Hook);
 	RayTracingOptions_setLightingModel(self, 1);
 	return result;
 }
@@ -31,9 +33,24 @@ void MCHooks_Init() {
 	uintptr_t isRayTracingAvailablePtr = FindSignature("40 53 48 83 EC 20 48 8B 01 48 8B D9 FF 50 08 84 C0 74 22 48 8B 03 48 8B CB FF 50 10 84 C0 74 15 48 8B 03 48 8B CB FF 50 18 84 C0 74 08 B0 01 48 83 C4 20 5B C3 32 C0 48 83 C4 20 5B C3");
 	if (!isRayTracingAvailablePtr) {
 		isRayTracingAvailablePtr = FindSignature("40 53 48 83 EC 20 48 8B 01 48 8B D9 48 8B 40 08 ?? ?? ?? ?? ?? ?? 84 C0 74 30 48 8B 03 48 8B CB 48 8B 40 10 ?? ?? ?? ?? ?? ?? 84 C0 74 1C 48 8B 03 48 8B CB 48 8B 40 18 ?? ?? ?? ?? ?? ?? 84 C0 74 08 B0 01 48 83 C4 20 5B C3 32 C0 48 83 C4 20 5B C3");
+		setLightingModelIndex = 8;
 	}
 	if (!isRayTracingAvailablePtr) {
 		isRayTracingAvailablePtr = FindSignature("40 53 48 83 EC 20 48 8B 01 48 8B D9 48 8B 40 08 ?? ?? ?? ?? ?? ?? 84 C0 74 30 48 8B 03 48 8B CB 48 8B 40 28 ?? ?? ?? ?? ?? ?? 84 C0 74 1C 48 8B 03 48 8B CB 48 8B 40 10 ?? ?? ?? ?? ?? ?? 84 C0 74 08 B0 01 48 83 C4 20 5B C3 32 C0 48 83 C4 20 5B C3 ");
+		setLightingModelIndex = 8;
+	}
+	if (!isRayTracingAvailablePtr) {
+		isRayTracingAvailablePtr = FindSignature(
+			"40 53"
+			"48 83 EC 20"
+			"48 8B 01"
+			"48 8B D9"
+			"48 8B 40 08"
+			"?? ?? ?? ?? ?? ??"
+			"84 C0"
+			"74 30"
+		);
+		setLightingModelIndex = 9;
 	}
 	if (isRayTracingAvailablePtr) {
 		Hook(RayTracingOptions_isRayTracingAvailable, (void*)isRayTracingAvailablePtr);
