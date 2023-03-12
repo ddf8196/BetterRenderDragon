@@ -71,8 +71,8 @@ HRESULT STDMETHODCALLTYPE ID3D12Device_CheckFeatureSupportHook(ID3D12Device* sel
 		D3D12_FEATURE_DATA_SHADER_MODEL* supportedShaderModel = (D3D12_FEATURE_DATA_SHADER_MODEL*)pFeatureSupportData;
 		printf("HighestShaderModel=%d\n", supportedShaderModel->HighestShaderModel);
 
-		if (supportedShaderModel->HighestShaderModel > D3D_SHADER_MODEL_6_3) {
-			supportedShaderModel->HighestShaderModel = D3D_SHADER_MODEL_6_3;
+		if (supportedShaderModel->HighestShaderModel > D3D_SHADER_MODEL_5_1) {
+			supportedShaderModel->HighestShaderModel = D3D_SHADER_MODEL_5_1;
 		}
 	}
 

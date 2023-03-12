@@ -9,8 +9,8 @@ void MCPatches_Init() {
 	if (ptr) {
 		DWORD oldProtect, tmp;
 		VirtualProtect((void*)ptr, 60, PAGE_READWRITE, &oldProtect);
-		((char*)ptr)[6] = 0x63;
-		((char*)ptr)[59] = 0x63;
+		((char*)ptr)[6] = 0x51;
+		((char*)ptr)[59] = 0x51;
 		VirtualProtect((void*)ptr, 60, oldProtect, &tmp);
 	} else {
 		printf("Failed to patch bgfx::d3d12rtx::RendererContextD3D12RTX::init\n");

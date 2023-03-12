@@ -9,4 +9,3 @@
 
 ## 最低要求
 - Direct3D 12
-- ShaderModel 6.3
