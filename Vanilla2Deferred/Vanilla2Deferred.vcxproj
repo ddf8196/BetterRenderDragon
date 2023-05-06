@@ -22,9 +22,9 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{463fc067-c7e5-4170-a353-d9747fbd9492}</ProjectGuid>
-    <RootNamespace>D3D12Hook</RootNamespace>
+    <RootNamespace>Vanilla2Deferred</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>RTX2Deferred</ProjectName>
+    <ProjectName>Vanilla2Deferred</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
