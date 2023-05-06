@@ -27,6 +27,9 @@
     <ClCompile Include="MCPatches.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Options.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3D12Hooks.h">
@@ -36,6 +39,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="MCPatches.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Options.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HookAPI.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

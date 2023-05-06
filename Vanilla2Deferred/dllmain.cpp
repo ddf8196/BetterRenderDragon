@@ -3,6 +3,7 @@
 #include "D3D12Hooks.h"
 #include "MCHooks.h"
 #include "MCPatches.h"
+#include "Options.h"
 
 BOOL APIENTRY DllMain(HMODULE hModule,
 	DWORD  ul_reason_for_call,
@@ -11,7 +12,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 {
     switch (ul_reason_for_call) {
 		case DLL_PROCESS_ATTACH:
-			D3D12Hooks_Init();
+			//D3D12Hooks_Init();
 			MCHooks_Init();
 			MCPatches_Init();
 			break;

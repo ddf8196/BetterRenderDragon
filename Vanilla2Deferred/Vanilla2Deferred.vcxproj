@@ -159,11 +159,14 @@
     <ClCompile Include="D3D12Hooks.cpp" />
     <ClCompile Include="MCHooks.cpp" />
     <ClCompile Include="MCPatches.cpp" />
+    <ClCompile Include="Options.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3D12Hooks.h" />
+    <ClInclude Include="HookAPI.h" />
     <ClInclude Include="MCHooks.h" />
     <ClInclude Include="MCPatches.h" />
+    <ClInclude Include="Options.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\lib\detours.lib" />
