@@ -155,6 +155,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\imgui\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="..\include\imgui\backends\imgui_impl_dx12.cpp" />
+    <ClCompile Include="..\include\imgui\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="..\include\imgui\imgui.cpp" />
+    <ClCompile Include="..\include\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\include\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\include\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="D3D12Hooks.cpp" />
     <ClCompile Include="MCHooks.cpp" />

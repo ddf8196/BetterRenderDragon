@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\imgui">
+      <UniqueIdentifier>{36988b6e-d3db-432d-9960-ce6567dc7de1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -29,6 +32,30 @@
     </ClCompile>
     <ClCompile Include="Options.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui.cpp">
+      <Filter>源文件\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_demo.cpp">
+      <Filter>源文件\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_draw.cpp">
+      <Filter>源文件\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_tables.cpp">
+      <Filter>源文件\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_widgets.cpp">
+      <Filter>源文件\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\backends\imgui_impl_dx11.cpp">
+      <Filter>源文件\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\backends\imgui_impl_dx12.cpp">
+      <Filter>源文件\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\backends\imgui_impl_win32.cpp">
+      <Filter>源文件\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
