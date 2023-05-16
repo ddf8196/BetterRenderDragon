@@ -21,9 +21,6 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="D3D12Hooks.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="MCHooks.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -48,20 +45,23 @@
     <ClCompile Include="..\include\imgui\imgui_widgets.cpp">
       <Filter>源文件\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\include\imgui\backends\imgui_impl_dx11.cpp">
-      <Filter>源文件\imgui</Filter>
-    </ClCompile>
     <ClCompile Include="..\include\imgui\backends\imgui_impl_dx12.cpp">
       <Filter>源文件\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\include\imgui\backends\imgui_impl_win32.cpp">
+    <ClCompile Include="ImGuiHooks.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_winrt.cpp">
+      <Filter>源文件\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Util.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\backends\imgui_impl_dx11.cpp">
       <Filter>源文件\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="D3D12Hooks.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="MCHooks.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -72,6 +72,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="HookAPI.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiHooks.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_winrt.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

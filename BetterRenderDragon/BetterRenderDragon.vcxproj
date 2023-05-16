@@ -14,9 +14,9 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{463fc067-c7e5-4170-a353-d9747fbd9492}</ProjectGuid>
-    <RootNamespace>Vanilla2Deferred</RootNamespace>
+    <RootNamespace>BetterRenderDragon</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>Vanilla2Deferred</ProjectName>
+    <ProjectName>BetterRenderDragon</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -67,6 +67,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -86,28 +90,35 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\include\imgui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\include\imgui\backends\imgui_impl_dx12.cpp" />
-    <ClCompile Include="..\include\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="..\include\imgui\imgui.cpp" />
     <ClCompile Include="..\include\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\include\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\include\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\include\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="ImGuiHooks.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="D3D12Hooks.cpp" />
+    <ClCompile Include="imgui_impl_winrt.cpp" />
     <ClCompile Include="MCHooks.cpp" />
     <ClCompile Include="MCPatches.cpp" />
     <ClCompile Include="Options.cpp" />
+    <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="D3D12Hooks.h" />
+    <ClInclude Include="ImGuiHooks.h" />
     <ClInclude Include="HookAPI.h" />
+    <ClInclude Include="imgui_impl_winrt.h" />
     <ClInclude Include="MCHooks.h" />
     <ClInclude Include="MCPatches.h" />
     <ClInclude Include="Options.h" />
+    <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\lib\detours.lib" />
