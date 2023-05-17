@@ -10,12 +10,14 @@
 #include "Core/Resource/ResourceHelper.h"
 #include "gsl/span"
 
+//=====================================================Vanilla2Deferred=====================================================
+
 using dragon::rendering::LightingModels;
 
 LightingModels(*RayTracingOptions_getLightingModel)(void* This) = nullptr;
 LightingModels RayTracingOptions_getLightingModel_Hook(void* This) {
 	LightingModels result = RayTracingOptions_getLightingModel(This);
-	if (result == LightingModels::Vanilla && Options::deferredRenderingEnabled) {
+	if (Options::vanilla2DeferredEnabled && Options::deferredRenderingEnabled && result == LightingModels::Vanilla) {
 		result = LightingModels::Deferred;
 	}
 	return result;
@@ -23,7 +25,7 @@ LightingModels RayTracingOptions_getLightingModel_Hook(void* This) {
 
 void(*RayTracingOptions_setLightingModel)(void* This, LightingModels lightingModel) = nullptr;
 void RayTracingOptions_setLightingModel_Hook(void* This, LightingModels lightingModel) {
-	if (lightingModel == LightingModels::Vanilla && Options::deferredRenderingEnabled) {
+	if (Options::vanilla2DeferredEnabled && Options::deferredRenderingEnabled && lightingModel == LightingModels::Vanilla) {
 		lightingModel = LightingModels::Deferred;
 	}
 	RayTracingOptions_setLightingModel(This, lightingModel);
@@ -41,16 +43,20 @@ DeclareHook(RayTracingOptions_isRayTracingAvailable, bool, void* self) {
 using dragon::materials::ShaderCodePlatform;
 DeclareHook(dragon_bgfximpl_getShaderCodePlatform, ShaderCodePlatform) {
 	ShaderCodePlatform result = original();
-	if (result == ShaderCodePlatform::Direct3D_SM65 && Options::deferredRenderingEnabled && Options::limitShaderModel) {
+	if (Options::vanilla2DeferredEnabled && Options::deferredRenderingEnabled && Options::limitShaderModel && result == ShaderCodePlatform::Direct3D_SM65) {
 		result = ShaderCodePlatform::Direct3D_SM60;
 	}
 	return result;
 }
 
+//======================================================CustomUniforms======================================================
+
 using dragon::materials::MaterialUniformName;
 DeclareHook(dragon_materials_MaterialUniformMap_setUniform_mun_vec4, void*, void* This, void* outParameterID, MaterialUniformName& name, gsl::span<Vec4>* value) {
 	return original(This, outParameterID, name, value);
 }
+
+//=====================================================MaterialBinLoader====================================================
 
 typedef bool(*PFN_ResourcePackManager_load)(void* This, const ResourceLocation& location, std::string& resourceStream);
 
@@ -71,7 +77,7 @@ DeclareHook(ResourcePackManager_constructor, void*, void* This, uintptr_t a2, ui
 
 DeclareHook(readFile, std::string*, void* This, std::string* retstr, Core::Path& path) {
 	std::string* result = original(This, retstr, path);
-	if (Options::redirectShaders && resourcePackManager) {
+	if (Options::materialBinLoaderEnabled && Options::redirectShaders && resourcePackManager) {
 		std::string& p = path.mPathPart.mUtf8StdString;
 		if (p.find("/data/renderer/materials/") != std::string::npos && strncmp(p.c_str() + p.size() - 13, ".material.bin", 13) == 0) {
 			std::string binPath = "renderer/materials/" + p.substr(p.find_last_of('/') + 1);
@@ -90,6 +96,8 @@ DeclareHook(readFile, std::string*, void* This, std::string* retstr, Core::Path&
 	}
 	return result;
 }
+
+//==========================================================================================================================
 
 void MCHooks_Init() {
 	printf("%s\n", __FUNCTION__);

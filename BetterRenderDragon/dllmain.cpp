@@ -12,13 +12,17 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 {
     switch (ul_reason_for_call) {
 		case DLL_PROCESS_ATTACH:
+			Options::load();
+
 			MCHooks_Init();
 			MCPatches_Init();
 			ImGuiHooks_Init();
 			break;
 		case DLL_THREAD_ATTACH:
 		case DLL_THREAD_DETACH:
+			break;
 		case DLL_PROCESS_DETACH:
+			Options::save();
 			break;
     }
     return TRUE;

@@ -18,16 +18,13 @@
 #include "Options.h"
 #include "Util.h"
 
-//=======================================================================================================================================================================//
+//=======================================================================================================================================================================
 
 IDXGIFactory2* Factory;
 IUnknown* CoreWindow;
-
 bool ImGuiInitialized = false;
-std::string CPUName;
-std::string GPUName;
 
-//=======================================================================================================================================================================//
+//=======================================================================================================================================================================
 
 void updateKeys() {
 	static bool prevToggleImGui = false;
@@ -45,11 +42,13 @@ void updateKeys() {
 }
 
 void updateImGui() {
-	static bool resetLayout = false;
-	static bool showDemo = false;
-
+	//static bool showDemo = false;
 	static bool showModuleManager = false;
 	static bool showAbout = false;
+
+	bool resetLayout = false;
+	bool moduleManagerRequestFocus = false;
+	bool aboutRequestFocus = false;
 
 	updateKeys();
 
@@ -57,42 +56,52 @@ void updateImGui() {
 	if (Options::showImGui) {
 		auto& io = ImGui::GetIO();
 
-		if (showDemo)
-			ImGui::ShowDemoWindow(&showDemo);
-
-		ImVec2 pos, size;
 		ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-		//ImGui::SetNextWindowSize(ImVec2(440, 540), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(410, 300), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("BetterRenderDragon", &Options::showImGui, ImGuiWindowFlags_MenuBar)) {
 			if (ImGui::BeginMenuBar()) {
-				if (ImGui::BeginMenu("Options")) {
-					ImGui::MenuItem("Modules...", NULL, &showModuleManager);
+				if (ImGui::BeginMenu("View")) {
+					if (ImGui::MenuItem("Open Module Manager", NULL)) {
+						showModuleManager = true;
+						moduleManagerRequestFocus = true;
+					}
+					//if (ImGui::MenuItem("Open ImGui Demo Window", NULL)) {
+					//	showDemo = true;
+					//}
 					ImGui::EndMenu();
 				}
 				if (ImGui::BeginMenu("Windows")) {
-					ImGui::MenuItem("Show ImGui demo window", NULL, &showDemo);
-					ImGui::MenuItem("Reset window position and size", NULL, &resetLayout);
+					if (ImGui::MenuItem("Reset window position and size", NULL))
+						resetLayout = true;
+					if (showModuleManager || showAbout/* || showDemo*/)
+						ImGui::Separator();
+					if (showModuleManager && ImGui::MenuItem("Module Manager", NULL))
+						moduleManagerRequestFocus = true;
+					if (showAbout && ImGui::MenuItem("About", NULL))
+						aboutRequestFocus = true;
+					//if (showDemo)
+					//	ImGui::MenuItem("ImGui Demo Window", NULL);
 					ImGui::EndMenu();
 				}
 				if (ImGui::BeginMenu("Help")) {
-					ImGui::MenuItem("About", NULL, &showAbout);
+					if (ImGui::MenuItem("About", NULL))
+						showAbout = true;
 					ImGui::EndMenu();
 				}
 				ImGui::EndMenuBar();
 			}
 
-			ImGui::Text("BetterRenderDragon v0.0.1");
+			ImGui::Text("BetterRenderDragon v1.3.0");
+			ImGui::NewLine();
 
-			if (ImGui::CollapsingHeader("Device Information & Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (Options::performanceEnabled && ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Indent();
-				ImGui::Text("CPU: %s", CPUName.c_str());
-				ImGui::Text("GPU: %s", GPUName.c_str());
 				ImGui::Text("FPS: %.01f", io.Framerate);
 				ImGui::Text("Frame Time: %.01fms", io.DeltaTime * 1000.0f);
 				ImGui::Unindent();
 			}
 
-			if (ImGui::CollapsingHeader("Vanilla2Deferred", ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (Options::vanilla2DeferredEnabled && ImGui::CollapsingHeader("Vanilla2Deferred", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Indent();
 				ImGui::Checkbox("Enable Deferred Rendering", &Options::deferredRenderingEnabled);
 				if (!Options::deferredRenderingEnabled)
@@ -104,26 +113,74 @@ void updateImGui() {
 				ImGui::Unindent();
 			}
 
-			if (ImGui::CollapsingHeader("MaterialBinLoader", ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (Options::materialBinLoaderEnabled && ImGui::CollapsingHeader("MaterialBinLoader", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Indent();
 				ImGui::Checkbox("Load shaders from resource pack", &Options::redirectShaders);
 				ImGui::Unindent();
 			}
 
+			if (Options::customUniformsEnabled && ImGui::CollapsingHeader("CustomUniforms", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::Indent();
+				ImGui::Unindent();
+			}
 			ImGui::NewLine();
 		}
 		ImGui::End();
+
+		if (showModuleManager) {
+			if (moduleManagerRequestFocus)
+				ImGui::SetNextWindowFocus();
+			ImGui::SetNextWindowSize(ImVec2(300, 130), ImGuiCond_FirstUseEver);
+			if (ImGui::Begin("BetterRenderDragon - Module Manager", &showModuleManager)) {
+				if (ImGui::BeginTable("modulesTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
+					ImGui::TableSetupColumn("Module");
+					ImGui::TableSetupColumn("Enabled");
+					ImGui::TableHeadersRow();
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0); ImGui::Text("Performance");
+					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##1", &Options::performanceEnabled);
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0); ImGui::Text("Vanilla2Deferred");
+					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##2", &Options::vanilla2DeferredEnabled);
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0); ImGui::Text("MaterialBinLoader");
+					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##3", &Options::materialBinLoaderEnabled);
+
+					//ImGui::TableNextRow();
+					//ImGui::TableSetColumnIndex(0); ImGui::Text("CustomUniforms");
+					//ImGui::TableSetColumnIndex(1); ImGui::Checkbox("", &Options::customUniformsEnabled);
+
+					ImGui::EndTable();
+				}
+			}
+			ImGui::End();
+		}
+
+		//if (showDemo)
+		//	ImGui::ShowDemoWindow(&showDemo);
+
+		if (showAbout) {
+			if (moduleManagerRequestFocus)
+				ImGui::SetNextWindowFocus();
+			if (ImGui::Begin("BetterRenderDragon - About", &showAbout)) {
+				ImGui::Text("BetterRenderDragon v1.3.0");
+				ImGui::Text("https://github.com/ddf8196/BetterRenderDragon");
+			}
+			ImGui::End();
+		}
 	}
 	ImGui::EndFrame();
 
 	if (resetLayout) {
-		resetLayout = false;
 		ImGui::ClearWindowSettings("BetterRenderDragon");
 		ImGui::ClearWindowSettings("Dear ImGui Demo");
 	}
 }
 
-//=======================================================================================================================================================================//
+//=======================================================================================================================================================================
 
 namespace ImGuiD3D12 {
 	CComPtr<ID3D12Device> Device;
@@ -141,26 +198,6 @@ namespace ImGuiD3D12 {
 
 	uint32_t BufferCount = 0;
 	BackBufferContext* BufferContext;
-
-	void GetDeviceNames() {
-		CPUName = getCPUName();
-
-		CComPtr<IDXGIFactory4> factory4;
-		if (Factory->QueryInterface(&factory4) == S_OK) {
-			CComPtr<IDXGIAdapter4> adapter;
-			if (factory4->EnumAdapterByLuid(Device->GetAdapterLuid(), IID_PPV_ARGS(&adapter)) == S_OK) {
-				DXGI_ADAPTER_DESC3 desc;
-				if (adapter->GetDesc3(&desc) == S_OK) {
-					GPUName = wstringToString(desc.Description);
-				}
-			}
-		}
-
-		if (CPUName.empty())
-			CPUName = "Unknown";
-		if (GPUName.empty())
-			GPUName = "Unknown";
-	}
 
 	void CreateRT(IDXGISwapChain* swapChain) {
 		const auto RTVDescriptorSize = Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -187,8 +224,6 @@ namespace ImGuiD3D12 {
 
 	bool initializeImgui(IDXGISwapChain* pSwapChain) {
 		if (SUCCEEDED(pSwapChain->GetDevice(IID_ID3D12Device, (void**)&Device))) {
-			GetDeviceNames();
-
 			ImGui::CreateContext();
 
 			ImGuiIO& io = ImGui::GetIO();
@@ -303,13 +338,13 @@ namespace ImGuiD3D12 {
 	}
 }
 
-//=======================================================================================================================================================================//
+//=======================================================================================================================================================================
 
 namespace ImGuiD3D11 {
 
 }
 
-//=======================================================================================================================================================================//
+//=======================================================================================================================================================================
 
 PFN_IDXGIFactory2_CreateSwapChainForCoreWindow Original_IDXGIFactory2_CreateSwapChainForCoreWindow;
 HRESULT STDMETHODCALLTYPE IDXGIFactory2_CreateSwapChainForCoreWindow_Hook(IDXGIFactory2* This, IUnknown* pDevice, IUnknown* pWindow, const DXGI_SWAP_CHAIN_DESC1* pDesc, IDXGIOutput* pRestrictToOutput, IDXGISwapChain1** ppSwapChain) {
@@ -339,7 +374,7 @@ HRESULT STDMETHODCALLTYPE IDXGIFactory2_CreateSwapChainForCoreWindow_Hook(IDXGIF
 	return hResult;
 }
 
-//=======================================================================================================================================================================//
+//=======================================================================================================================================================================
 
 DeclareHook(CreateDXGIFactory1, HRESULT, REFIID riid, void** ppFactory) {
 	HRESULT hResult = original(riid, ppFactory);
@@ -355,7 +390,7 @@ DeclareHook(CreateDXGIFactory1, HRESULT, REFIID riid, void** ppFactory) {
 	return hResult;
 }
 
-//=======================================================================================================================================================================//
+//=======================================================================================================================================================================
 
 void ImGuiHooks_Init() {
 	printf("%s\n", __FUNCTION__);
@@ -372,4 +407,4 @@ void ImGuiHooks_Init() {
 	Hook(CreateDXGIFactory1, CreateDXGIFactory1);
 }
 
-//=======================================================================================================================================================================//
+//=======================================================================================================================================================================
