@@ -63,15 +63,14 @@ typedef bool(*PFN_ResourcePackManager_load)(void* This, const ResourceLocation& 
 void* resourcePackManager;
 PFN_ResourcePackManager_load ResourcePackManager_load;
 DeclareHook(ResourcePackManager_constructor, void*, void* This, uintptr_t a2, uintptr_t a3, bool needsToInitialize) {
-	printf("ResourcePackManager::ResourcePackManager needsToInitialize=%s\n", needsToInitialize ? "true" : "false");
-
 	void* result = original(This, a2, a3, needsToInitialize);
 	if (needsToInitialize && !resourcePackManager) {
+		printf("ResourcePackManager::ResourcePackManager needsToInitialize=true\n");
+
 		resourcePackManager = This;
 		void** vptr = *(void***)resourcePackManager;
 		ResourcePackManager_load = (PFN_ResourcePackManager_load)*(vptr + 3);
 	}
-
 	return result;
 }
 
@@ -87,10 +86,7 @@ DeclareHook(readFile, std::string*, void* This, std::string* retstr, Core::Path&
 
 			bool success = ResourcePackManager_load(resourcePackManager, location, out);
 			if (success) {
-				printf("ResourcePackManager::load Success location=%s length=%lld\n", binPath.c_str(), out.length());
 				retstr->assign(out);
-			} else {
-				printf("ResourcePackManager::load Failure location=%s\n", binPath.c_str());
 			}
 		}
 	}

@@ -159,11 +159,8 @@ void updateImGui() {
 			ImGui::End();
 		}
 
-		//if (showDemo)
-		//	ImGui::ShowDemoWindow(&showDemo);
-
 		if (showAbout) {
-			if (moduleManagerRequestFocus)
+			if (aboutRequestFocus)
 				ImGui::SetNextWindowFocus();
 			if (ImGui::Begin("BetterRenderDragon - About", &showAbout)) {
 				ImGui::Text("BetterRenderDragon v1.3.0");
@@ -171,6 +168,9 @@ void updateImGui() {
 			}
 			ImGui::End();
 		}
+
+		//if (showDemo)
+		//	ImGui::ShowDemoWindow(&showDemo);
 	}
 	ImGui::EndFrame();
 
