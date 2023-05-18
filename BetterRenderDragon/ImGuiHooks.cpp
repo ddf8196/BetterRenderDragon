@@ -84,8 +84,10 @@ void updateImGui() {
 					ImGui::EndMenu();
 				}
 				if (ImGui::BeginMenu("Help")) {
-					if (ImGui::MenuItem("About", NULL))
+					if (ImGui::MenuItem("About", NULL)) {
 						showAbout = true;
+						aboutRequestFocus = true;
+					}
 					ImGui::EndMenu();
 				}
 				ImGui::EndMenuBar();
@@ -109,7 +111,7 @@ void updateImGui() {
 				ImGui::Checkbox("Limit ShaderModel", &Options::limitShaderModel);
 				if (!Options::deferredRenderingEnabled)
 					ImGui::EndDisabled();
-				ImGui::Checkbox("Disable RendererContextD3D12RTX (Requires restart)", &Options::disableRendererContextD3D12RTX);
+				ImGui::Checkbox("Disable RTX (Requires restart)", &Options::disableRendererContextD3D12RTX);
 				ImGui::Unindent();
 			}
 
@@ -203,7 +205,7 @@ namespace ImGuiD3D12 {
 		const auto RTVDescriptorSize = Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 		D3D12_CPU_DESCRIPTOR_HANDLE RTVHandle = DescriptorHeapBackBuffers->GetCPUDescriptorHandleForHeapStart();
 
-		for (size_t i = 0; i < BufferCount; i++) {
+		for (uint32_t i = 0; i < BufferCount; i++) {
 			ID3D12Resource* pBackBuffer = nullptr;
 			BufferContext[i].DescriptorHandle = RTVHandle;
 			swapChain->GetBuffer(i, IID_PPV_ARGS(&pBackBuffer));
@@ -316,7 +318,7 @@ namespace ImGuiD3D12 {
 
 		if (!ImGuiInitialized) {
 			printf("Initializing ImGui\n");
-			if (ImGuiD3D12::initializeImgui(This)) {
+			if (initializeImgui(This)) {
 				ImGuiInitialized = true;
 			} else {
 				printf("ImGui is not initialized\n");
@@ -324,7 +326,7 @@ namespace ImGuiD3D12 {
 			}
 		}
 
-		ImGuiD3D12::renderImGui(swapChain3);
+		renderImGui(swapChain3);
 
 		return Original_IDXGISwapChain_Present(This, SyncInterval, Flags);
 	}
@@ -341,16 +343,53 @@ namespace ImGuiD3D12 {
 //=======================================================================================================================================================================
 
 namespace ImGuiD3D11 {
+	ID3D11Device* Device;
 
+	bool initializeImgui(IDXGISwapChain* pSwapChain) {
+		return false;
+	}
+
+	void renderImGui(IDXGISwapChain3* swapChain) {
+
+	}
+
+	PFN_IDXGISwapChain_Present Original_IDXGISwapChain_Present = nullptr;
+	HRESULT STDMETHODCALLTYPE IDXGISwapChain_Present_Hook(IDXGISwapChain* This, UINT SyncInterval, UINT Flags) {
+		CComPtr<IDXGISwapChain3> swapChain3;
+		if (FAILED(This->QueryInterface<IDXGISwapChain3>(&swapChain3))) {
+			return Original_IDXGISwapChain_Present(This, SyncInterval, Flags);
+		}
+
+		if (!ImGuiInitialized) {
+			printf("Initializing ImGui\n");
+			if (initializeImgui(This)) {
+				ImGuiInitialized = true;
+			} else {
+				//printf("ImGui is not initialized\n");
+				return Original_IDXGISwapChain_Present(This, SyncInterval, Flags);
+			}
+		}
+
+		renderImGui(swapChain3);
+
+		return Original_IDXGISwapChain_Present(This, SyncInterval, Flags);
+	}
+
+	PFN_IDXGISwapChain_ResizeBuffers Original_IDXGISwapChain_ResizeBuffers;
+	HRESULT STDMETHODCALLTYPE IDXGISwapChain_ResizeBuffers_Hook(IDXGISwapChain* This, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags) {
+
+		HRESULT hResult = Original_IDXGISwapChain_ResizeBuffers(This, BufferCount, Width, Height, NewFormat, SwapChainFlags);
+
+		return hResult;
+	}
 }
 
 //=======================================================================================================================================================================
 
 PFN_IDXGIFactory2_CreateSwapChainForCoreWindow Original_IDXGIFactory2_CreateSwapChainForCoreWindow;
 HRESULT STDMETHODCALLTYPE IDXGIFactory2_CreateSwapChainForCoreWindow_Hook(IDXGIFactory2* This, IUnknown* pDevice, IUnknown* pWindow, const DXGI_SWAP_CHAIN_DESC1* pDesc, IDXGIOutput* pRestrictToOutput, IDXGISwapChain1** ppSwapChain) {
-	printf("%s\n", __FUNCTION__);
-
-	CoreWindow = pWindow;
+	if (pWindow)
+		CoreWindow = pWindow;
 
 	HRESULT hResult = Original_IDXGIFactory2_CreateSwapChainForCoreWindow(This, pDevice, pWindow, pDesc, pRestrictToOutput, ppSwapChain);
 	if (SUCCEEDED(hResult)) {
@@ -366,7 +405,11 @@ HRESULT STDMETHODCALLTYPE IDXGIFactory2_CreateSwapChainForCoreWindow_Hook(IDXGIF
 				ReplaceVtable(*(void**)swapChain, 13, (void**)&ImGuiD3D12::Original_IDXGISwapChain_ResizeBuffers, ImGuiD3D12::IDXGISwapChain_ResizeBuffers_Hook);
 		} else if (SUCCEEDED(pDevice->QueryInterface(&d3d11Device))) {
 			//Direct3D 11
-
+			ImGuiD3D11::Device = (ID3D11Device*)pDevice;
+			if (!ImGuiD3D11::Original_IDXGISwapChain_Present)
+				ReplaceVtable(*(void**)swapChain, 8, (void**)&ImGuiD3D11::Original_IDXGISwapChain_Present, ImGuiD3D11::IDXGISwapChain_Present_Hook);
+			if (!ImGuiD3D11::Original_IDXGISwapChain_ResizeBuffers)
+				ReplaceVtable(*(void**)swapChain, 13, (void**)&ImGuiD3D11::Original_IDXGISwapChain_ResizeBuffers, ImGuiD3D11::IDXGISwapChain_ResizeBuffers_Hook);
 		} else {
 			
 		}
@@ -379,8 +422,7 @@ HRESULT STDMETHODCALLTYPE IDXGIFactory2_CreateSwapChainForCoreWindow_Hook(IDXGIF
 DeclareHook(CreateDXGIFactory1, HRESULT, REFIID riid, void** ppFactory) {
 	HRESULT hResult = original(riid, ppFactory);
 	if (IsEqualIID(IID_IDXGIFactory2, riid) && SUCCEEDED(hResult)) {
-		printf("IID_IDXGIFactory2\n");
-
+		printf("CreateDXGIFactory1 riid=IID_IDXGIFactory2\n");
 		IDXGIFactory2* factory = (IDXGIFactory2*)*ppFactory;
 		if (!Original_IDXGIFactory2_CreateSwapChainForCoreWindow)
 			ReplaceVtable(*(void**)factory, 16, (void**)&Original_IDXGIFactory2_CreateSwapChainForCoreWindow, IDXGIFactory2_CreateSwapChainForCoreWindow_Hook);
