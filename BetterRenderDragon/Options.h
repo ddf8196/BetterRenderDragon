@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "Core/Math/Vec4.h"
 
 class Options {
@@ -17,6 +18,11 @@ public:
 
 	static bool customUniformsEnabled;
 
+	static bool init();
 	static bool load();
 	static bool save();
+
+private:
+	static std::string optionsDir;
+	static std::string optionsFile;
 };
