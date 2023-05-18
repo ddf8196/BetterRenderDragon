@@ -361,7 +361,7 @@ namespace ImGuiD3D11 {
 		}
 
 		if (!ImGuiInitialized) {
-			printf("Initializing ImGui\n");
+			//printf("Initializing ImGui\n");
 			if (initializeImgui(This)) {
 				ImGuiInitialized = true;
 			} else {
