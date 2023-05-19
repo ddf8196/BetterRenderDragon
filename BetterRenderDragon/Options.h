@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "Core/Math/Vec4.h"
+#include <atomic>
 
 class Options {
 public:
@@ -17,6 +17,8 @@ public:
 	static bool redirectShaders;
 
 	static bool customUniformsEnabled;
+
+	static std::atomic_bool dirty;
 
 	static bool init();
 	static bool load();

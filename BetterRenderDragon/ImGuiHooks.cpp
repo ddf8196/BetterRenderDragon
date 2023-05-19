@@ -26,6 +26,70 @@ bool ImGuiInitialized = false;
 
 //=======================================================================================================================================================================
 
+//std::atomic_bool running = true;
+//DWORD WINAPI trySaveOptions(LPVOID lpThreadParameter) {
+//	while (running) {
+//		if (Options::dirty) {
+//			Options::save();
+//			Options::dirty = false;
+//		}
+//		Sleep(1000);
+//	}
+//	return 0;
+//}
+
+//=======================================================================================================================================================================
+
+void updateOptions() {
+	static float saveTimer = 0.0f;
+
+	static bool showImGui = Options::showImGui;
+	static bool performanceEnabled = Options::performanceEnabled;
+	static bool vanilla2DeferredEnabled = Options::vanilla2DeferredEnabled;
+	static bool deferredRenderingEnabled = Options::deferredRenderingEnabled;
+	static bool limitShaderModel = Options::limitShaderModel;
+	static bool disableRendererContextD3D12RTX = Options::disableRendererContextD3D12RTX;
+	static bool materialBinLoaderEnabled = Options::materialBinLoaderEnabled;
+	static bool redirectShaders = Options::redirectShaders;
+	static bool customUniformsEnabled = Options::customUniformsEnabled;
+
+	if (showImGui != Options::showImGui
+		|| performanceEnabled != Options::performanceEnabled
+		|| vanilla2DeferredEnabled != Options::vanilla2DeferredEnabled
+		|| deferredRenderingEnabled != Options::deferredRenderingEnabled
+		|| limitShaderModel != Options::limitShaderModel
+		|| disableRendererContextD3D12RTX != Options::disableRendererContextD3D12RTX
+		|| materialBinLoaderEnabled != Options::materialBinLoaderEnabled
+		|| redirectShaders != Options::redirectShaders
+		|| customUniformsEnabled != Options::customUniformsEnabled) {
+
+		Options::dirty = true;
+		saveTimer = 3.0f;
+
+		showImGui = Options::showImGui;
+		performanceEnabled = Options::performanceEnabled;
+		vanilla2DeferredEnabled = Options::vanilla2DeferredEnabled;
+		deferredRenderingEnabled = Options::deferredRenderingEnabled;
+		limitShaderModel = Options::limitShaderModel;
+		disableRendererContextD3D12RTX = Options::disableRendererContextD3D12RTX;
+		materialBinLoaderEnabled = Options::materialBinLoaderEnabled;
+		redirectShaders = Options::redirectShaders;
+		customUniformsEnabled = Options::customUniformsEnabled;
+	}
+
+	//TODO: Put it on a separate thread
+	if (saveTimer > 0.0f) {
+		saveTimer -= ImGui::GetIO().DeltaTime;
+		if (saveTimer <= 0.0f) {
+			saveTimer = 0.0f;
+			if (Options::dirty) {
+				Options::save();
+				Options::dirty = false;
+			}
+		}
+	}
+}
+
 void updateKeys() {
 	static bool prevToggleImGui = false;
 	static bool prevToggleDeferredRendering = false;
@@ -51,13 +115,14 @@ void updateImGui() {
 	bool aboutRequestFocus = false;
 
 	updateKeys();
+	updateOptions();
 
 	ImGui::NewFrame();
 	if (Options::showImGui) {
 		auto& io = ImGui::GetIO();
 
 		ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(410, 300), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(350, 300), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("BetterRenderDragon", &Options::showImGui, ImGuiWindowFlags_MenuBar)) {
 			if (ImGui::BeginMenuBar()) {
 				if (ImGui::BeginMenu("View")) {

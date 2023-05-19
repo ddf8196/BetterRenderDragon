@@ -8,6 +8,7 @@
 #include "Renderdragon/Materials/MaterialUniformName.h"
 #include "Renderdragon/Rendering/LightingModels.h"
 #include "Core/Resource/ResourceHelper.h"
+#include "Core/Math/Vec4.h"
 #include "gsl/span"
 
 //=====================================================Vanilla2Deferred=====================================================

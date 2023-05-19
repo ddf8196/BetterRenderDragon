@@ -23,6 +23,8 @@ bool Options::redirectShaders = true;
 
 bool Options::customUniformsEnabled = false;
 
+std::atomic_bool Options::dirty = false;
+
 std::string Options::optionsDir;
 std::string Options::optionsFile;
 
