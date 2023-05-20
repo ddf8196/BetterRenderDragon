@@ -19,6 +19,9 @@ private:
 	EventRegistrationToken pointerMovedToken, pointerExitedToken, pointerPressedToken, pointerReleasedToken, pointerWheelChangedToken;
     EventRegistrationToken keyDownToken, keyUpToken;
     EventRegistrationToken characterReceivedToken;
+    EventRegistrationToken dpiChangedToken;
+
+	float dpi;
 
     void UpdateMouseButtonState(ABI::Windows::UI::Core::IPointerEventArgs* args);
 	HRESULT OnPointerMoved(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IPointerEventArgs* args);
@@ -29,5 +32,6 @@ private:
 	HRESULT OnKeyDown(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IKeyEventArgs* args);
 	HRESULT OnKeyUp(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IKeyEventArgs* args);
 	HRESULT OnCharacterReceived(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::ICharacterReceivedEventArgs* args);
+	HRESULT OnDpiChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args);
 };
 

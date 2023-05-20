@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cmath>
 
 #include <CoreWindow.h>
 
@@ -12,6 +13,7 @@ using ABI::Windows::UI::Core::ICharacterReceivedEventArgs;
 
 using Microsoft::WRL::ComPtr;
 using Microsoft::WRL::Callback;
+using Microsoft::WRL::Wrappers::HStringReference;
 
 struct ImGui_ImplWinRT_Data {
 	ComPtr<ICoreWindow>        CoreWindow;
@@ -214,6 +216,12 @@ static ImGuiKey ImGui_ImplWinRT_VirtualKeyToImGuiKey(ABI::Windows::System::Virtu
 	}
 }
 
+// Converts a length in device-independent pixels (DIPs) to a length in physical pixels.
+inline float ConvertDipsToPixels(float dips, float dpi) {
+	static const float dipsPerInch = 96.0f;
+	return floorf(dips * dpi / dipsPerInch + 0.5f); // Round to nearest integer.
+}
+
 #define RETURN_IF_FAILED(hr) {HRESULT __hr_##__LINE__##__ = (hr); if(FAILED(__hr_##__LINE__##__)) { return; }}
 #define WARN_IF_FAILED(hr) {HRESULT __hr_##__LINE__##__ = (hr); if(FAILED(__hr_##__LINE__##__)) { printf("%s Line %d FAILED hr=0x%08X\n", __FUNCTION__, __LINE__, __hr_##__LINE__##__); }}
 
@@ -230,6 +238,23 @@ ImGuiInputEventHandler::ImGuiInputEventHandler(ICoreWindow* window) : window(win
 	WARN_IF_FAILED(this->window->add_KeyDown(Callback<KeyEventHandler>(this, &ImGuiInputEventHandler::OnKeyDown).Get(), &keyDownToken));
 	WARN_IF_FAILED(this->window->add_KeyUp(Callback<KeyEventHandler>(this, &ImGuiInputEventHandler::OnKeyUp).Get(), &keyUpToken));
 	WARN_IF_FAILED(this->window->add_CharacterReceived(Callback<CharacterReceivedEventHandler>(this, &ImGuiInputEventHandler::OnCharacterReceived).Get(), &characterReceivedToken));
+
+	dpi = 96;
+	ComPtr<ABI::Windows::Graphics::Display::IDisplayInformationStatics> displayInfoStatics;
+	if (FAILED(RoGetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(), IID_PPV_ARGS(&displayInfoStatics)))) {
+		printf("Failed to get IDisplayInformationStatics\n");
+		return;
+	}
+	ComPtr<ABI::Windows::Graphics::Display::IDisplayInformation> displayInfo;
+	if (FAILED(displayInfoStatics->GetForCurrentView(&displayInfo))) {
+		printf("Failed to get IDisplayInformation\n");
+		return;
+	}
+	if (FAILED(displayInfo->get_LogicalDpi(&dpi))) {
+		printf("Failed to get DPI\n");
+	}
+	printf("DPI=%f\n", dpi);
+	displayInfo->add_DpiChanged(Callback<__FITypedEventHandler_2_Windows__CGraphics__CDisplay__CDisplayInformation_IInspectable>(this, &ImGuiInputEventHandler::OnDpiChanged).Get(), &dpiChangedToken);
 }
 
 ImGuiInputEventHandler::~ImGuiInputEventHandler() {
@@ -255,7 +280,7 @@ void ImGuiInputEventHandler::UpdateMouseButtonState(IPointerEventArgs* args) {
 	currentPoint->get_Position(&pos);
 	
 	io.AddMouseSourceEvent(ImGuiMouseSource_Mouse);
-	io.AddMousePosEvent(pos.X, pos.Y);
+	io.AddMousePosEvent(ConvertDipsToPixels(pos.X, dpi), ConvertDipsToPixels(pos.Y, dpi));
 
 	using ABI::Windows::UI::Input::PointerUpdateKind;
 	PointerUpdateKind kind;
@@ -291,7 +316,7 @@ HRESULT ImGuiInputEventHandler::OnPointerMoved(ICoreWindow* sender, IPointerEven
 	currentPoint->get_Position(&pos);
 
 	io.AddMouseSourceEvent(ImGuiMouseSource_Mouse);
-	io.AddMousePosEvent(pos.X, pos.Y);
+	io.AddMousePosEvent(ConvertDipsToPixels(pos.X, dpi), ConvertDipsToPixels(pos.Y, dpi));
 	return S_OK;
 }
 
@@ -358,5 +383,15 @@ HRESULT ImGuiInputEventHandler::OnCharacterReceived(ICoreWindow* sender, ICharac
 
 	io.AddInputCharacter(c);
 
+	return S_OK;
+}
+
+HRESULT ImGuiInputEventHandler::OnDpiChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args) {
+	printf("DPI changed\n");
+	if (FAILED(sender->get_LogicalDpi(&dpi))) {
+		printf("Failed to get DPI\n");
+		dpi = 96;
+	}
+	printf("DPI=%f\n", dpi);
 	return S_OK;
 }
