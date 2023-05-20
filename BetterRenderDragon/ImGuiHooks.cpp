@@ -158,7 +158,7 @@ void updateImGui() {
 				ImGui::EndMenuBar();
 			}
 
-			ImGui::Text("BetterRenderDragon v1.3.0");
+			ImGui::Text("BetterRenderDragon v1.3.1");
 			ImGui::NewLine();
 
 			if (Options::performanceEnabled && ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -230,7 +230,7 @@ void updateImGui() {
 			if (aboutRequestFocus)
 				ImGui::SetNextWindowFocus();
 			if (ImGui::Begin("BetterRenderDragon - About", &showAbout)) {
-				ImGui::Text("BetterRenderDragon v1.3.0");
+				ImGui::Text("BetterRenderDragon v1.3.1");
 				ImGui::Text("https://github.com/ddf8196/BetterRenderDragon");
 			}
 			ImGui::End();
