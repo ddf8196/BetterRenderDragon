@@ -15,6 +15,7 @@ public:
 	~ImGuiInputEventHandler();
 private:
 	Microsoft::WRL::ComPtr<ABI::Windows::UI::Core::ICoreWindow> window;
+	Microsoft::WRL::ComPtr<ABI::Windows::Graphics::Display::IDisplayInformation> displayInfo;
 
 	EventRegistrationToken pointerMovedToken, pointerExitedToken, pointerPressedToken, pointerReleasedToken, pointerWheelChangedToken;
     EventRegistrationToken keyDownToken, keyUpToken;

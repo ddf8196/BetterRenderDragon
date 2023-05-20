@@ -87,7 +87,7 @@ std::string getLocalStatePath() {
 bool Options::init() {
 	if (optionsDir.empty()) {
 		std::string localStatePath = getLocalStatePath();
-		printf("%s\n", localStatePath.c_str());
+		//printf("%s\n", localStatePath.c_str());
 		if (localStatePath.empty()) {
 			return false;
 		}

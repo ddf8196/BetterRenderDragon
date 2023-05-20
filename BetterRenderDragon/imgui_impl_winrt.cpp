@@ -245,7 +245,6 @@ ImGuiInputEventHandler::ImGuiInputEventHandler(ICoreWindow* window) : window(win
 		printf("Failed to get IDisplayInformationStatics\n");
 		return;
 	}
-	ComPtr<ABI::Windows::Graphics::Display::IDisplayInformation> displayInfo;
 	if (FAILED(displayInfoStatics->GetForCurrentView(&displayInfo))) {
 		printf("Failed to get IDisplayInformation\n");
 		return;
@@ -266,6 +265,10 @@ ImGuiInputEventHandler::~ImGuiInputEventHandler() {
 	this->window->remove_KeyDown(keyDownToken);
 	this->window->remove_KeyUp(keyUpToken);
 	this->window->remove_CharacterReceived(characterReceivedToken);
+
+	if (this->displayInfo) {
+		this->displayInfo->remove_DpiChanged(dpiChangedToken);
+	}
 }
 
 void ImGuiInputEventHandler::UpdateMouseButtonState(IPointerEventArgs* args) {
