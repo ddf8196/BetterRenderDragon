@@ -8,6 +8,7 @@ public:
 
 	static bool performanceEnabled;
 
+	static bool vanilla2DeferredAvailable;
 	static bool vanilla2DeferredEnabled;
 	static bool deferredRenderingEnabled;
 	static bool limitShaderModel;

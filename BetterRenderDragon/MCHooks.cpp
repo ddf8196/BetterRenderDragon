@@ -13,12 +13,16 @@
 
 //=====================================================Vanilla2Deferred=====================================================
 
+inline bool isDeferredEnabled() {
+	return Options::vanilla2DeferredAvailable && Options::vanilla2DeferredEnabled && Options::deferredRenderingEnabled;
+}
+
 using dragon::rendering::LightingModels;
 
 LightingModels(*RayTracingOptions_getLightingModel)(void* This) = nullptr;
 LightingModels RayTracingOptions_getLightingModel_Hook(void* This) {
 	LightingModels result = RayTracingOptions_getLightingModel(This);
-	if (Options::vanilla2DeferredEnabled && Options::deferredRenderingEnabled && result == LightingModels::Vanilla) {
+	if (isDeferredEnabled() && result == LightingModels::Vanilla) {
 		result = LightingModels::Deferred;
 	}
 	return result;
@@ -26,7 +30,7 @@ LightingModels RayTracingOptions_getLightingModel_Hook(void* This) {
 
 void(*RayTracingOptions_setLightingModel)(void* This, LightingModels lightingModel) = nullptr;
 void RayTracingOptions_setLightingModel_Hook(void* This, LightingModels lightingModel) {
-	if (Options::vanilla2DeferredEnabled && Options::deferredRenderingEnabled && lightingModel == LightingModels::Vanilla) {
+	if (isDeferredEnabled() && lightingModel == LightingModels::Vanilla) {
 		lightingModel = LightingModels::Deferred;
 	}
 	RayTracingOptions_setLightingModel(This, lightingModel);
@@ -44,7 +48,7 @@ DeclareHook(RayTracingOptions_isRayTracingAvailable, bool, void* self) {
 using dragon::materials::ShaderCodePlatform;
 DeclareHook(dragon_bgfximpl_getShaderCodePlatform, ShaderCodePlatform) {
 	ShaderCodePlatform result = original();
-	if (Options::vanilla2DeferredEnabled && Options::deferredRenderingEnabled && Options::limitShaderModel && result == ShaderCodePlatform::Direct3D_SM65) {
+	if (isDeferredEnabled() && Options::limitShaderModel && result == ShaderCodePlatform::Direct3D_SM65) {
 		result = ShaderCodePlatform::Direct3D_SM60;
 	}
 	return result;

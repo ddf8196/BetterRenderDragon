@@ -13,6 +13,7 @@ bool Options::showImGui = true;
 
 bool Options::performanceEnabled = true;
 
+bool Options::vanilla2DeferredAvailable = true;
 bool Options::vanilla2DeferredEnabled = true;
 bool Options::deferredRenderingEnabled = false;
 bool Options::limitShaderModel = true;

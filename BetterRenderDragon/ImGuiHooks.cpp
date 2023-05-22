@@ -169,6 +169,8 @@ void updateImGui() {
 			}
 
 			if (Options::vanilla2DeferredEnabled && ImGui::CollapsingHeader("Vanilla2Deferred", ImGuiTreeNodeFlags_DefaultOpen)) {
+				if (!Options::vanilla2DeferredAvailable)
+					ImGui::BeginDisabled();
 				ImGui::Indent();
 				ImGui::Checkbox("Enable Deferred Rendering", &Options::deferredRenderingEnabled);
 				if (!Options::deferredRenderingEnabled)
@@ -178,6 +180,8 @@ void updateImGui() {
 					ImGui::EndDisabled();
 				ImGui::Checkbox("Disable RTX (Requires restart)", &Options::disableRendererContextD3D12RTX);
 				ImGui::Unindent();
+				if (!Options::vanilla2DeferredAvailable)
+					ImGui::EndDisabled();
 			}
 
 			if (Options::materialBinLoaderEnabled && ImGui::CollapsingHeader("MaterialBinLoader", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -247,6 +251,14 @@ void updateImGui() {
 	}
 }
 
+void initializeImgui() {
+	ImGui::CreateContext();
+
+	ImGuiIO& io = ImGui::GetIO();
+	io.IniFilename = nullptr;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+}
+
 //=======================================================================================================================================================================
 
 namespace ImGuiD3D12 {
@@ -289,13 +301,9 @@ namespace ImGuiD3D12 {
 		}
 	}
 
-	bool initializeImgui(IDXGISwapChain* pSwapChain) {
+	bool initializeImguiBackend(IDXGISwapChain* pSwapChain) {
 		if (SUCCEEDED(pSwapChain->GetDevice(IID_ID3D12Device, (void**)&Device))) {
-			ImGui::CreateContext();
-
-			ImGuiIO& io = ImGui::GetIO();
-			io.IniFilename = nullptr;
-			//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+			initializeImgui();
 
 			DXGI_SWAP_CHAIN_DESC Desc;
 			pSwapChain->GetDesc(&Desc);
@@ -382,8 +390,8 @@ namespace ImGuiD3D12 {
 		}
 
 		if (!ImGuiInitialized) {
-			printf("Initializing ImGui\n");
-			if (initializeImgui(This)) {
+			printf("Initializing ImGui on Direct3D 12\n");
+			if (initializeImguiBackend(This)) {
 				ImGuiInitialized = true;
 			} else {
 				printf("ImGui is not initialized\n");
@@ -409,13 +417,63 @@ namespace ImGuiD3D12 {
 
 namespace ImGuiD3D11 {
 	ID3D11Device* Device;
+	CComPtr<ID3D11DeviceContext> DeviceContext;
 
-	bool initializeImgui(IDXGISwapChain* pSwapChain) {
-		return false;
+	uint32_t BufferCount = 0;
+	ID3D11RenderTargetView** RenderTargetViews;
+
+	void CreateRT(IDXGISwapChain* swapChain) {
+		for (uint32_t i = 0; i < BufferCount; i++) {
+			CComPtr<ID3D11Resource> backBuffer;
+			swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer));
+
+			ID3D11RenderTargetView* rtv;
+			Device->CreateRenderTargetView(backBuffer, nullptr, &rtv);
+
+			RenderTargetViews[i] = rtv;
+		}
+	}
+
+	void ReleaseRT() {
+		for (size_t i = 0; i < BufferCount; i++) {
+			if (RenderTargetViews[i]) {
+				RenderTargetViews[i]->Release();
+				RenderTargetViews[i] = nullptr;
+			}
+		}
+	}
+
+	bool initializeImguiBackend(IDXGISwapChain* pSwapChain) {
+		initializeImgui();
+
+		DXGI_SWAP_CHAIN_DESC Desc;
+		pSwapChain->GetDesc(&Desc);
+
+		BufferCount = Desc.BufferCount;
+		RenderTargetViews = new ID3D11RenderTargetView*[BufferCount];
+
+		Device->GetImmediateContext(&DeviceContext);
+
+		CreateRT(pSwapChain);
+
+		ImGui_ImplWinRT_Init(CoreWindow);
+		ImGui_ImplDX11_Init(Device, DeviceContext);
+		ImGui_ImplDX11_CreateDeviceObjects();
+
+		return true;
 	}
 
 	void renderImGui(IDXGISwapChain3* swapChain) {
+		ImGui_ImplDX11_NewFrame();
+		ImGui_ImplWinRT_NewFrame();
 
+		updateImGui();
+
+		ID3D11RenderTargetView* currentRTV = RenderTargetViews[swapChain->GetCurrentBackBufferIndex()];
+		DeviceContext->OMSetRenderTargets(1, &currentRTV, nullptr);
+
+		ImGui::Render();
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	}
 
 	PFN_IDXGISwapChain_Present Original_IDXGISwapChain_Present = nullptr;
@@ -425,26 +483,18 @@ namespace ImGuiD3D11 {
 			return Original_IDXGISwapChain_Present(This, SyncInterval, Flags);
 		}
 
-		if (!ImGuiInitialized) {
-			//printf("Initializing ImGui\n");
-			if (initializeImgui(This)) {
-				ImGuiInitialized = true;
-			} else {
-				//printf("ImGui is not initialized\n");
-				return Original_IDXGISwapChain_Present(This, SyncInterval, Flags);
-			}
+		if (ImGuiInitialized) {
+			renderImGui(swapChain3);
 		}
-
-		renderImGui(swapChain3);
 
 		return Original_IDXGISwapChain_Present(This, SyncInterval, Flags);
 	}
 
 	PFN_IDXGISwapChain_ResizeBuffers Original_IDXGISwapChain_ResizeBuffers;
 	HRESULT STDMETHODCALLTYPE IDXGISwapChain_ResizeBuffers_Hook(IDXGISwapChain* This, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags) {
-
+		ReleaseRT();
 		HRESULT hResult = Original_IDXGISwapChain_ResizeBuffers(This, BufferCount, Width, Height, NewFormat, SwapChainFlags);
-
+		CreateRT(This);
 		return hResult;
 	}
 }
@@ -463,18 +513,26 @@ HRESULT STDMETHODCALLTYPE IDXGIFactory2_CreateSwapChainForCoreWindow_Hook(IDXGIF
 		CComPtr<ID3D11Device> d3d11Device;
 		if (SUCCEEDED(pDevice->QueryInterface(&d3d12CommandQueue))) {
 			//Direct3D 12
+			Options::vanilla2DeferredAvailable = true;
 			ImGuiD3D12::CommandQueue = (ID3D12CommandQueue*)pDevice;
 			if (!ImGuiD3D12::Original_IDXGISwapChain_Present)
 				ReplaceVtable(*(void**)swapChain, 8, (void**)&ImGuiD3D12::Original_IDXGISwapChain_Present, ImGuiD3D12::IDXGISwapChain_Present_Hook);
 			if (!ImGuiD3D12::Original_IDXGISwapChain_ResizeBuffers)
 				ReplaceVtable(*(void**)swapChain, 13, (void**)&ImGuiD3D12::Original_IDXGISwapChain_ResizeBuffers, ImGuiD3D12::IDXGISwapChain_ResizeBuffers_Hook);
+			//When the graphics API used by RenderDragon is D3D12, this function will be called in a non-main thread and later IDXGISwapChain::Present will be called three times in the main thread, so initialize ImGui later in IDXGISwapChain::Present
 		} else if (SUCCEEDED(pDevice->QueryInterface(&d3d11Device))) {
 			//Direct3D 11
+			Options::vanilla2DeferredAvailable = false;
 			ImGuiD3D11::Device = (ID3D11Device*)pDevice;
 			if (!ImGuiD3D11::Original_IDXGISwapChain_Present)
 				ReplaceVtable(*(void**)swapChain, 8, (void**)&ImGuiD3D11::Original_IDXGISwapChain_Present, ImGuiD3D11::IDXGISwapChain_Present_Hook);
 			if (!ImGuiD3D11::Original_IDXGISwapChain_ResizeBuffers)
 				ReplaceVtable(*(void**)swapChain, 13, (void**)&ImGuiD3D11::Original_IDXGISwapChain_ResizeBuffers, ImGuiD3D11::IDXGISwapChain_ResizeBuffers_Hook);
+			// When the graphics API used by RenderDragon is D3D11, this function will be called in the main thread, and IDXGISwapChain::Present will all be called in a non-main thread, so initialize ImGui here immediately
+			printf("Initializing ImGui on Direct3D 11\n");
+			if (!(ImGuiInitialized = ImGuiD3D11::initializeImguiBackend(swapChain))) {
+				printf("Failed to initialize ImGui on Direct3D 11\n");
+			}
 		} else {
 			
 		}
