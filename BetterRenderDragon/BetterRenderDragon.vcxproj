@@ -112,6 +112,7 @@
     <ClInclude Include="MCPatches.h" />
     <ClInclude Include="Options.h" />
     <ClInclude Include="Util.h" />
+    <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\lib\detours.lib" />

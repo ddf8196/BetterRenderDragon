@@ -17,12 +17,17 @@
 #include "HookAPI.h"
 #include "Options.h"
 #include "Util.h"
+#include "Version.h"
 
 //=======================================================================================================================================================================
 
 IDXGIFactory2* Factory;
 IUnknown* CoreWindow;
 bool ImGuiInitialized = false;
+
+std::string CPUName;
+std::string GPUName;
+std::string RendererType;
 
 //=======================================================================================================================================================================
 
@@ -158,7 +163,7 @@ void updateImGui() {
 				ImGui::EndMenuBar();
 			}
 
-			ImGui::Text("BetterRenderDragon v1.3.1");
+			ImGui::Text("BetterRenderDragon %s", BetterRDVersion);
 			ImGui::NewLine();
 
 			if (Options::performanceEnabled && ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -234,7 +239,7 @@ void updateImGui() {
 			if (aboutRequestFocus)
 				ImGui::SetNextWindowFocus();
 			if (ImGui::Begin("BetterRenderDragon - About", &showAbout)) {
-				ImGui::Text("BetterRenderDragon v1.3.1");
+				ImGui::Text("BetterRenderDragon %s", BetterRDVersion);
 				ImGui::Text("https://github.com/ddf8196/BetterRenderDragon");
 			}
 			ImGui::End();
