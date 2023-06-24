@@ -131,7 +131,6 @@ bool Options::load() {
 
 	vanilla2DeferredEnabled = data["vanilla2DeferredEnabled"];
 	deferredRenderingEnabled = data["deferredRenderingEnabled"];
-	limitShaderModel = data["limitShaderModel"];
 	disableRendererContextD3D12RTX = data["disableRendererContextD3D12RTX"];
 
 	materialBinLoaderEnabled = data["materialBinLoaderEnabled"];
@@ -150,7 +149,6 @@ bool Options::save() {
 
 	data["vanilla2DeferredEnabled"] = vanilla2DeferredEnabled;
 	data["deferredRenderingEnabled"] = deferredRenderingEnabled;
-	data["limitShaderModel"] = limitShaderModel;
 	data["disableRendererContextD3D12RTX"] = disableRendererContextD3D12RTX;
 
 	data["materialBinLoaderEnabled"] = materialBinLoaderEnabled;

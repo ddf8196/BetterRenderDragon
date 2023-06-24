@@ -178,11 +178,6 @@ void updateImGui() {
 					ImGui::BeginDisabled();
 				ImGui::Indent();
 				ImGui::Checkbox("Enable Deferred Rendering", &Options::deferredRenderingEnabled);
-				if (!Options::deferredRenderingEnabled)
-					ImGui::BeginDisabled();
-				ImGui::Checkbox("Limit ShaderModel", &Options::limitShaderModel);
-				if (!Options::deferredRenderingEnabled)
-					ImGui::EndDisabled();
 				ImGui::Checkbox("Disable RTX (Requires restart)", &Options::disableRendererContextD3D12RTX);
 				ImGui::Unindent();
 				if (!Options::vanilla2DeferredAvailable)
@@ -308,6 +303,14 @@ namespace ImGuiD3D12 {
 
 	bool initializeImguiBackend(IDXGISwapChain* pSwapChain) {
 		if (SUCCEEDED(pSwapChain->GetDevice(IID_ID3D12Device, (void**)&Device))) {
+			bool dxr11 = false;
+			D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = { 0 };
+			if (SUCCEEDED(Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5)))) {
+				dxr11 = options5.RaytracingTier >= 11;
+			}
+			Options::vanilla2DeferredAvailable = true;
+			Options::limitShaderModel = !dxr11;
+
 			initializeImgui();
 
 			DXGI_SWAP_CHAIN_DESC Desc;
@@ -449,6 +452,9 @@ namespace ImGuiD3D11 {
 	}
 
 	bool initializeImguiBackend(IDXGISwapChain* pSwapChain) {
+		Options::vanilla2DeferredAvailable = false;
+		Options::limitShaderModel = false;
+
 		initializeImgui();
 
 		DXGI_SWAP_CHAIN_DESC Desc;
@@ -518,7 +524,6 @@ HRESULT STDMETHODCALLTYPE IDXGIFactory2_CreateSwapChainForCoreWindow_Hook(IDXGIF
 		CComPtr<ID3D11Device> d3d11Device;
 		if (SUCCEEDED(pDevice->QueryInterface(&d3d12CommandQueue))) {
 			//Direct3D 12
-			Options::vanilla2DeferredAvailable = true;
 			ImGuiD3D12::CommandQueue = (ID3D12CommandQueue*)pDevice;
 			if (!ImGuiD3D12::Original_IDXGISwapChain_Present)
 				ReplaceVtable(*(void**)swapChain, 8, (void**)&ImGuiD3D12::Original_IDXGISwapChain_Present, ImGuiD3D12::IDXGISwapChain_Present_Hook);
@@ -527,7 +532,6 @@ HRESULT STDMETHODCALLTYPE IDXGIFactory2_CreateSwapChainForCoreWindow_Hook(IDXGIF
 			//When the graphics API used by RenderDragon is D3D12, this function will be called in a non-main thread and later IDXGISwapChain::Present will be called three times in the main thread, so initialize ImGui later in IDXGISwapChain::Present
 		} else if (SUCCEEDED(pDevice->QueryInterface(&d3d11Device))) {
 			//Direct3D 11
-			Options::vanilla2DeferredAvailable = false;
 			ImGuiD3D11::Device = (ID3D11Device*)pDevice;
 			if (!ImGuiD3D11::Original_IDXGISwapChain_Present)
 				ReplaceVtable(*(void**)swapChain, 8, (void**)&ImGuiD3D11::Original_IDXGISwapChain_Present, ImGuiD3D11::IDXGISwapChain_Present_Hook);
