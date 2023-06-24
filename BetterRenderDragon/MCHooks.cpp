@@ -22,6 +22,8 @@ using dragon::rendering::LightingModels;
 LightingModels(*RayTracingOptions_getLightingModel)(void* This) = nullptr;
 LightingModels RayTracingOptions_getLightingModel_Hook(void* This) {
 	LightingModels result = RayTracingOptions_getLightingModel(This);
+	//printf("RayTracingOptions::getLightingModel result=%d\n", result);
+
 	if (isDeferredEnabled() && result == LightingModels::Vanilla) {
 		result = LightingModels::Deferred;
 	}
@@ -30,6 +32,8 @@ LightingModels RayTracingOptions_getLightingModel_Hook(void* This) {
 
 void(*RayTracingOptions_setLightingModel)(void* This, LightingModels lightingModel) = nullptr;
 void RayTracingOptions_setLightingModel_Hook(void* This, LightingModels lightingModel) {
+	//printf("RayTracingOptions::setLightingModel lightingModel=%d\n", lightingModel);
+
 	if (isDeferredEnabled() && lightingModel == LightingModels::Vanilla) {
 		lightingModel = LightingModels::Deferred;
 	}
@@ -88,11 +92,13 @@ DeclareHook(readFile, std::string*, void* This, std::string* retstr, Core::Path&
 			Core::Path path1(binPath);
 			ResourceLocation location(path1);
 			std::string out;
+			//printf("ResourcePackManager::load path=%s\n", binPath.c_str());
 
 			bool success = ResourcePackManager_load(resourcePackManager, location, out);
 			if (success) {
 				retstr->assign(out);
 			}
+			//printf("ResourcePackManager::load ret=%d\n", success);
 		}
 	}
 	return result;
@@ -141,27 +147,33 @@ void MCHooks_Init() {
 		printf("Failed to hook dragon::bgfximpl::getShaderCodePlatform\n");
 	}
 
-	//dragon::materials::MaterialUniformMap::setUniform<glm::vec4>
-	//1.19.40
-	uintptr_t setUniformPtr = NULL;
-	uintptr_t call_setUniformPtr = FindSignature(
-		"E8 ? ? ? ? "
-		"F3 41 0F 10 96 ? ? ? ? "
-	);
-	if (call_setUniformPtr) {
-		setUniformPtr = call_setUniformPtr + 5 + *(int32_t*)(call_setUniformPtr + 1);
-	}
-	if (setUniformPtr) {
-		Hook(dragon_materials_MaterialUniformMap_setUniform_mun_vec4, (void*)setUniformPtr);
-	} else {
-		printf("Failed to hook dragon::materials::MaterialUniformMap::setUniform<glm::vec4>\n");
-	}
+	////dragon::materials::MaterialUniformMap::setUniform<glm::vec4>
+	////1.19.40
+	//uintptr_t setUniformPtr = NULL;
+	//uintptr_t call_setUniformPtr = FindSignature(
+	//	"E8 ? ? ? ? "
+	//	"F3 41 0F 10 96 ? ? ? ? "
+	//);
+	//if (call_setUniformPtr) {
+	//	setUniformPtr = call_setUniformPtr + 5 + *(int32_t*)(call_setUniformPtr + 1);
+	//}
+	//if (setUniformPtr) {
+	//	Hook(dragon_materials_MaterialUniformMap_setUniform_mun_vec4, (void*)setUniformPtr);
+	//} else {
+	//	printf("Failed to hook dragon::materials::MaterialUniformMap::setUniform<glm::vec4>\n");
+	//}
 
 	//ResourcePackManager::ResourcePackManager
 	//1.19.80
 	uintptr_t resourcePackManagerPtr = FindSignature(
 		"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 41 0F B6 F1 49 8B D8 4C 8B F2 48 8B F9"
 	);
+	if (!resourcePackManagerPtr) {
+		//1.20.1
+		resourcePackManagerPtr = FindSignature(
+			"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 41 0F B6 F1 49 8B F8 4C 8B F2 48 8B D9"
+		);
+	}
 	if (resourcePackManagerPtr) {
 		Hook(ResourcePackManager_constructor, (void*)resourcePackManagerPtr);
 	} else {
