@@ -8,10 +8,17 @@
 #include "nlohmann/json.hpp"
 #include "Options.h"
 #include "Util.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
+#include "imgui/backends/imgui_impl_dx12.h"
+#include "imgui/backends/imgui_impl_dx11.h"
+#include "imgui_impl_winrt.h"
 
+#include "ImGuiHooks.h"
 bool Options::showImGui = true;
 
 bool Options::performanceEnabled = true;
+bool Options::windowSettingsEnabled = true;
 
 bool Options::vanilla2DeferredAvailable = true;
 bool Options::vanilla2DeferredEnabled = true;
@@ -21,6 +28,7 @@ bool Options::disableRendererContextD3D12RTX = false;
 
 bool Options::materialBinLoaderEnabled = true;
 bool Options::redirectShaders = true;
+int Options::uikey = ImGuiKey_Delete;
 
 bool Options::customUniformsEnabled = false;
 
@@ -128,6 +136,14 @@ bool Options::load() {
 	showImGui = data["showImGui"];
 
 	performanceEnabled = data["performanceEnabled"];
+	windowSettingsEnabled = data["windowSettingsEnabled"];
+	if (data.contains("uikey") == false)
+		uikey = (int)ImGuiKey_Delete;
+	else {
+		uikey = data["uikey"];
+		if (uikey == 0)
+			uikey = (int)ImGuiKey_Delete;
+	}
 
 	vanilla2DeferredEnabled = data["vanilla2DeferredEnabled"];
 	deferredRenderingEnabled = data["deferredRenderingEnabled"];
@@ -146,6 +162,8 @@ bool Options::save() {
 	data["showImGui"] = showImGui;
 
 	data["performanceEnabled"] = performanceEnabled;
+	data["windowSettingsEnabled"] = windowSettingsEnabled;
+	data["uikey"] = uikey;
 
 	data["vanilla2DeferredEnabled"] = vanilla2DeferredEnabled;
 	data["deferredRenderingEnabled"] = deferredRenderingEnabled;

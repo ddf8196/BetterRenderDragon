@@ -24,6 +24,8 @@
 IDXGIFactory2* Factory;
 IUnknown* CoreWindow;
 bool ImGuiInitialized = false;
+bool IsChangingUIKey = false;
+bool JustChangedKey = false;
 
 std::string CPUName;
 std::string GPUName;
@@ -57,6 +59,7 @@ void updateOptions() {
 	static bool materialBinLoaderEnabled = Options::materialBinLoaderEnabled;
 	static bool redirectShaders = Options::redirectShaders;
 	static bool customUniformsEnabled = Options::customUniformsEnabled;
+	static bool windowSettingsEnabled = Options::windowSettingsEnabled;
 
 	if (showImGui != Options::showImGui
 		|| performanceEnabled != Options::performanceEnabled
@@ -66,7 +69,8 @@ void updateOptions() {
 		|| disableRendererContextD3D12RTX != Options::disableRendererContextD3D12RTX
 		|| materialBinLoaderEnabled != Options::materialBinLoaderEnabled
 		|| redirectShaders != Options::redirectShaders
-		|| customUniformsEnabled != Options::customUniformsEnabled) {
+		|| customUniformsEnabled != Options::customUniformsEnabled
+		|| windowSettingsEnabled != Options::windowSettingsEnabled) {
 
 		Options::dirty = true;
 		saveTimer = 3.0f;
@@ -80,6 +84,7 @@ void updateOptions() {
 		materialBinLoaderEnabled = Options::materialBinLoaderEnabled;
 		redirectShaders = Options::redirectShaders;
 		customUniformsEnabled = Options::customUniformsEnabled;
+		windowSettingsEnabled = Options::windowSettingsEnabled;
 	}
 
 	//TODO: Put it on a separate thread
@@ -95,11 +100,14 @@ void updateOptions() {
 	}
 }
 
+
 void updateKeys() {
 	static bool prevToggleImGui = false;
 	static bool prevToggleDeferredRendering = false;
 
-	bool toggleImGui = ImGui::IsKeyDown(ImGuiKey_F6);
+	bool toggleImGui = ImGui::IsKeyPressed((ImGuiKey)Options::uikey) && !JustChangedKey;
+	if (!toggleImGui)
+		JustChangedKey = false;
 	if (toggleImGui && !prevToggleImGui)
 		Options::showImGui = !Options::showImGui;
 	prevToggleImGui = toggleImGui;
@@ -127,7 +135,7 @@ void updateImGui() {
 		auto& io = ImGui::GetIO();
 
 		ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(350, 300), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(350, 350), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("BetterRenderDragon", &Options::showImGui, ImGuiWindowFlags_MenuBar)) {
 			if (ImGui::BeginMenuBar()) {
 				if (ImGui::BeginMenu("View")) {
@@ -190,6 +198,26 @@ void updateImGui() {
 				ImGui::Unindent();
 			}
 
+			if (Options::windowSettingsEnabled && ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::Indent();
+				if (ImGui::Button(IsChangingUIKey == false ? "Set Open UI Key" : "Cancel")) {
+					IsChangingUIKey = !IsChangingUIKey;
+				}
+				if (IsChangingUIKey) {
+					for (int i = ImGuiKey_NamedKey_BEGIN; i < ImGuiKey_COUNT; i++) {
+						if (ImGui::IsKeyDown((ImGuiKey)i) && !ImGui::IsMouseKey((ImGuiKey)i)) {
+							Options::uikey = i;
+							IsChangingUIKey = false;
+							ImGui::GetIO().AddKeyEvent((ImGuiKey)Options::uikey, false);
+							JustChangedKey = true;
+							break;
+						}
+					}
+				}
+				ImGui::Text("UI Key: %s", ImGui::GetKeyName((ImGuiKey)Options::uikey));
+				ImGui::Unindent();
+			}
+
 			if (Options::customUniformsEnabled && ImGui::CollapsingHeader("CustomUniforms", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Indent();
 				ImGui::Unindent();
@@ -219,6 +247,10 @@ void updateImGui() {
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0); ImGui::Text("MaterialBinLoader");
 					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##3", &Options::materialBinLoaderEnabled);
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0); ImGui::Text("Settings");
+					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##4", &Options::windowSettingsEnabled);
 
 					//ImGui::TableNextRow();
 					//ImGui::TableSetColumnIndex(0); ImGui::Text("CustomUniforms");
