@@ -135,7 +135,7 @@ void updateImGui() {
 		auto& io = ImGui::GetIO();
 
 		ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(350, 350), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(350, 300), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("BetterRenderDragon", &Options::showImGui, ImGuiWindowFlags_MenuBar)) {
 			if (ImGui::BeginMenuBar()) {
 				if (ImGui::BeginMenu("View")) {
@@ -198,6 +198,7 @@ void updateImGui() {
 				ImGui::Unindent();
 			}
 
+#if 0
 			if (Options::windowSettingsEnabled && ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Indent();
 				if (ImGui::Button(IsChangingUIKey == false ? "Set Open UI Key" : "Cancel")) {
@@ -217,6 +218,7 @@ void updateImGui() {
 				ImGui::Text("UI Key: %s", ImGui::GetKeyName((ImGuiKey)Options::uikey));
 				ImGui::Unindent();
 			}
+#endif
 
 			if (Options::customUniformsEnabled && ImGui::CollapsingHeader("CustomUniforms", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Indent();
@@ -248,9 +250,11 @@ void updateImGui() {
 					ImGui::TableSetColumnIndex(0); ImGui::Text("MaterialBinLoader");
 					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##3", &Options::materialBinLoaderEnabled);
 
+#if 0
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0); ImGui::Text("Settings");
 					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##4", &Options::windowSettingsEnabled);
+#endif
 
 					//ImGui::TableNextRow();
 					//ImGui::TableSetColumnIndex(0); ImGui::Text("CustomUniforms");

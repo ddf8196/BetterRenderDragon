@@ -9,12 +9,7 @@
 #include "Options.h"
 #include "Util.h"
 #include "imgui/imgui.h"
-#include "imgui/imgui_internal.h"
-#include "imgui/backends/imgui_impl_dx12.h"
-#include "imgui/backends/imgui_impl_dx11.h"
-#include "imgui_impl_winrt.h"
 
-#include "ImGuiHooks.h"
 bool Options::showImGui = true;
 
 bool Options::performanceEnabled = true;
@@ -28,7 +23,7 @@ bool Options::disableRendererContextD3D12RTX = false;
 
 bool Options::materialBinLoaderEnabled = true;
 bool Options::redirectShaders = true;
-int Options::uikey = ImGuiKey_Delete;
+int Options::uikey = ImGuiKey_F6;
 
 bool Options::customUniformsEnabled = false;
 
@@ -136,6 +131,8 @@ bool Options::load() {
 	showImGui = data["showImGui"];
 
 	performanceEnabled = data["performanceEnabled"];
+
+#if 0
 	windowSettingsEnabled = data["windowSettingsEnabled"];
 	if (data.contains("uikey") == false)
 		uikey = (int)ImGuiKey_Delete;
@@ -144,6 +141,7 @@ bool Options::load() {
 		if (uikey == 0)
 			uikey = (int)ImGuiKey_Delete;
 	}
+#endif
 
 	vanilla2DeferredEnabled = data["vanilla2DeferredEnabled"];
 	deferredRenderingEnabled = data["deferredRenderingEnabled"];
@@ -162,8 +160,11 @@ bool Options::save() {
 	data["showImGui"] = showImGui;
 
 	data["performanceEnabled"] = performanceEnabled;
+
+#if 0
 	data["windowSettingsEnabled"] = windowSettingsEnabled;
 	data["uikey"] = uikey;
+#endif
 
 	data["vanilla2DeferredEnabled"] = vanilla2DeferredEnabled;
 	data["deferredRenderingEnabled"] = deferredRenderingEnabled;
@@ -174,7 +175,7 @@ bool Options::save() {
 
 	//data["customUniformsEnabled"] = customUniformsEnabled;
 
-	std::ofstream ofs(optionsFile, std::ifstream::binary);
+	std::ofstream ofs(optionsFile, std::ofstream::binary);
 	ofs << std::setw(4) << data << std::endl;
 	return true;
 }
