@@ -8,6 +8,8 @@ public:
 
 	static bool performanceEnabled;
 
+	static bool windowSettingsEnabled;
+
 	static bool vanilla2DeferredAvailable;
 	static bool vanilla2DeferredEnabled;
 	static bool deferredRenderingEnabled;
@@ -18,6 +20,7 @@ public:
 	static bool redirectShaders;
 
 	static bool customUniformsEnabled;
+	static int uikey;
 
 	static std::atomic_bool dirty;
 
