@@ -29,6 +29,7 @@ _**0. YOU HAVE TO DO THIS EVERYTIME YOU WANT TO USE BRD!**_
 * Press **`F6`** to show or hide the BetterRenderDragon Menu!
 
 ### Deferred Lighting Engine Pipeline
+![image](https://github.com/miqumi/Gooder/assets/80510430/605dbbac-7c3f-445a-9f14-e9136d9996e9)
 * Press **`Ctrl`** + **`;`** to turn deferred rendering on or off
 * Running Deferred Rendering requires a RayTracing resource pack to be on!
 
