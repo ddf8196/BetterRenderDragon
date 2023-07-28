@@ -21,10 +21,8 @@ MCBE正式版1.19.80,预览版1.20.0
 * `F6` 开启或关闭ImGui显示
 
 ### Vanilla2Deferred
-![image](https://github.com/miqumi/Gooder/assets/80510430/6d1061ce-7a42-488b-8615-6b501f7053eb)
 * `Ctrl` + `;` 开启或关闭延迟渲染
 * 需安装并启用光线追踪资源包
-
 
 ## 最低要求
 - Direct3D 12
