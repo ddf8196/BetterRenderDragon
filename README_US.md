@@ -17,7 +17,6 @@ _**0. YOU HAVE TO DO THIS EVERYTIME YOU WANT TO USE BRD!**_
    -  Not doing these steps wll result in Vanilla Minecraft being launched!
 1. **Check your Minecraft Version**
    -  BetterRenderDragon currently supports stable versions 1.19.80 to 1.20.2
-   -  [Check out this tutorial on how to downgrade your Minecraft versions](https://placehold.er)
       **(ONLY YOU HAVE VERSIONS 1.20.2+)**
 2. **Get BetterRenderDragon!**
    - Download BetterRenderDragon From [here](https://github.com/ddf8196/BetterRenderDragon/releases/latest)!
