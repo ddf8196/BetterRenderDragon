@@ -4,6 +4,8 @@
 
 namespace dragon {
 	namespace materials {
+        typedef uint16_t ParameterId;
+
         struct MaterialUniformName {
 	        uint64_t mHash;
 

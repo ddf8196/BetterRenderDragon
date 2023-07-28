@@ -43,7 +43,8 @@ void RayTracingOptions_setLightingModel_Hook(void* This, LightingModels lighting
 DeclareHook(RayTracingOptions_isRayTracingAvailable, bool, void* self) {
 	printf("RayTracingOptions::isRayTracingAvailable\n");
 
-	ReplaceVtable(*(void**)self, 8, (void**)&RayTracingOptions_getLightingModel, RayTracingOptions_getLightingModel_Hook);
+	ReplaceVtable(*(void**)self, 9, (void**)&RayTracingOptions_getLightingModel, RayTracingOptions_getLightingModel_Hook);
+	ReplaceVtable(*(void**)self, 10, (void**)&RayTracingOptions_setLightingModel, RayTracingOptions_setLightingModel_Hook);
 	bool result = original(self);
 	Unhook(RayTracingOptions_isRayTracingAvailable);
 	return result;
@@ -169,9 +170,15 @@ void MCHooks_Init() {
 		"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 41 0F B6 F1 49 8B D8 4C 8B F2 48 8B F9"
 	);
 	if (!resourcePackManagerPtr) {
-		//1.20.1
+		//1.20.1.02
 		resourcePackManagerPtr = FindSignature(
 			"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 41 0F B6 F1 49 8B F8 4C 8B F2 48 8B D9"
+		);
+	}
+	if (!resourcePackManagerPtr) {
+		//1.20.10.23 preview
+		resourcePackManagerPtr = FindSignature(
+			"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 45 0F B6 F1 49 8B F8 48 8B F2 48 8B D9"
 		);
 	}
 	if (resourcePackManagerPtr) {

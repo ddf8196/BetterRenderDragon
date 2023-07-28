@@ -26,6 +26,10 @@ void MCPatches_Init() {
 	//bgfx::d3d12::RendererContextD3D12::init
 	//1.19.40
 	uintptr_t ptr2 = FindSignature("81 BF ?? ?? 00 00 86 80 00 00");
+	if (!ptr2) {
+		//1.20.0.23 preview
+		ptr2 = FindSignature("81 BE ?? ?? 00 00 86 80 00 00");
+	}
 	if (ptr2) {
 		DWORD oldProtect, tmp;
 		VirtualProtect((void*)ptr2, 10, PAGE_READWRITE, &oldProtect);
@@ -37,15 +41,15 @@ void MCPatches_Init() {
 	}
 
 	//Fix rendering issues on some NVIDIA GPUs
-	//unkFunc1
+	//dragon::bgfximpl::toSamplerFlags
 	//1.20.0.22 preview
-	uintptr_t ptr3 = FindSignature("B8 00 00 07 00 C3");
+	uintptr_t ptr3 = FindSignature("FF E1 B8 00 00 07 00 C3");
 	if (ptr3) {
 		DWORD oldProtect, tmp;
-		VirtualProtect((void*)ptr3, 6, PAGE_READWRITE, &oldProtect);
-		((char*)ptr3)[3] = 0;
-		VirtualProtect((void*)ptr3, 6, oldProtect, &tmp);
+		VirtualProtect((void*)ptr3, 8, PAGE_READWRITE, &oldProtect);
+		((char*)ptr3)[5] = 0;
+		VirtualProtect((void*)ptr3, 8, oldProtect, &tmp);
 	} else {
-		printf("Failed to patch unkFunc1\n");
+		printf("Failed to patch dragon::bgfximpl::toSamplerFlags\n");
 	}
 }

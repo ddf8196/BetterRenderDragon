@@ -15,9 +15,11 @@ struct _Hook_##name { \
     static ret original(Params&&... params) { return (*_original)(std::forward<Params>(params)...); } \
     static ret _hook(__VA_ARGS__); \
 }; \
-ret (*_Hook_##name::_original)(__VA_ARGS__); \
+ret (*_Hook_##name::_original)(__VA_ARGS__) = nullptr; \
 ret _Hook_##name::_hook(__VA_ARGS__)
 
+#define CallOriginal(name, ...) _Hook_##name::original(__VA_ARGS__)
+#define IsHooked(name) (_Hook_##name::_original != nullptr)
 #define Hook(name, ptr) HookFunction(ptr, (void**)&_Hook_##name::_original, &_Hook_##name::_hook)
 #define Unhook(name) UnhookFunction(_Hook_##name::_original, &_Hook_##name::_hook)
 
@@ -87,6 +89,9 @@ inline uintptr_t FindSig(const char* moduleName, const char* signature) {
                 return match;
             }
         } else {
+            if (match) {
+                i--;
+            }
             match = 0;
             patternIdx = 0;
         }
