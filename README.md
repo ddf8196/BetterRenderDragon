@@ -10,10 +10,10 @@
 * 可配置功能的ImGui
 
 ## 支持的版本
-MCBE正式版1.19.80,预览版1.20.0
+MCBE正式版或预览版1.20.10以上
 
 ## 使用
-1. 安装MCBE 1.19.80及以上版本
+1. 安装MCBE 1.20.10及以上版本
 2. 从[Releases](https://github.com/ddf8196/BetterRenderDragon/releases/latest)中下载`BetterRenderDragon.zip`并解压
 3. 双击`LaunchMinecraft.bat`启动正式版MC, 或双击`LaunchMinecraftPreview.bat`启动预览版MC
 
@@ -25,4 +25,5 @@ MCBE正式版1.19.80,预览版1.20.0
 * 需安装并启用光线追踪资源包
 
 ## 最低要求
-- Direct3D 12
+* Direct3D 11 (无法启用延迟渲染)
+* 启用延迟渲染最低需要Direct3D 12

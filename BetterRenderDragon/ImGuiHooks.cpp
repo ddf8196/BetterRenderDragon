@@ -135,7 +135,7 @@ void updateImGui() {
 		auto& io = ImGui::GetIO();
 
 		ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(350, 300), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(300, 280), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("BetterRenderDragon", &Options::showImGui, ImGuiWindowFlags_MenuBar)) {
 			if (ImGui::BeginMenuBar()) {
 				if (ImGui::BeginMenu("View")) {
