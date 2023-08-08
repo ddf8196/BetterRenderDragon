@@ -16,7 +16,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	GetModuleFileNameA(GetModuleHandleA(nullptr), fileName, sizeof(fileName) - 1);
 	int len = strlen(fileName);
 	if (len < 21 || strncmp(fileName + len - 21, "Minecraft.Windows.exe", 21) != 0) {
-		return FALSE;
+		return TRUE;
 	}
 
     switch (ul_reason_for_call) {
