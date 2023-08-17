@@ -10,7 +10,7 @@ Enhancement Mod for the RenderDragon Engine of _**Minecraft: Bedrock Edition**_
 * Configurable ImGui
 
 ## Support Versions
-MCBE Offical version 1.20.10+, Preview version 1.20.10+
+MCBE Official version 1.20.10+, Preview version 1.20.10+
 
 ## Installation
 _**0. YOU HAVE TO DO THIS EVERYTIME YOU WANT TO USE BRD!**_
