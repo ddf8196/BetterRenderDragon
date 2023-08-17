@@ -135,7 +135,7 @@ void updateImGui() {
 		auto& io = ImGui::GetIO();
 
 		ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(300, 280), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(300, 250), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("BetterRenderDragon", &Options::showImGui, ImGuiWindowFlags_MenuBar)) {
 			if (ImGui::BeginMenuBar()) {
 				if (ImGui::BeginMenu("View")) {
@@ -185,7 +185,7 @@ void updateImGui() {
 				if (!Options::vanilla2DeferredAvailable)
 					ImGui::BeginDisabled();
 				ImGui::Indent();
-				ImGui::Checkbox("Enable Deferred Rendering", &Options::deferredRenderingEnabled);
+				//ImGui::Checkbox("Enable Deferred Rendering", &Options::deferredRenderingEnabled);
 				ImGui::Checkbox("Disable RTX (Requires restart)", &Options::disableRendererContextD3D12RTX);
 				ImGui::Unindent();
 				if (!Options::vanilla2DeferredAvailable)

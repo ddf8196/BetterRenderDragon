@@ -22,7 +22,7 @@ void MCPatches_Init() {
 		}
 	}
 
-	//Bypass VendorID check to support Intel GPUs
+	//Bypass VendorID check to support some Intel GPUs
 	//bgfx::d3d12::RendererContextD3D12::init
 	//1.19.40
 	uintptr_t ptr2 = FindSignature("81 BF ?? ?? 00 00 86 80 00 00");
