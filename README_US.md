@@ -10,7 +10,7 @@ Enhancement Mod for the RenderDragon Engine of _**Minecraft: Bedrock Edition**_
 * Configurable ImGui
 
 ## Support Versions
-MCBE Offical version 1.20.10+, Preview version 1.20.10+
+MCBE Official version 1.20.10+, Preview version 1.20.10+
 
 ## Installation
 _**0. YOU HAVE TO DO THIS EVERYTIME YOU WANT TO USE BRD!**_
@@ -22,7 +22,7 @@ _**0. YOU HAVE TO DO THIS EVERYTIME YOU WANT TO USE BRD!**_
    - Download BetterRenderDragon From [here](https://github.com/ddf8196/BetterRenderDragon/releases/latest)!
    - Unzip the file `BetterRenderDragon.zip` to an empty folder!
 3. **Start It!**
-   - In the BetterRenderDragon folder, double-Click **`LaunchMinecraft.bat`**__ to launch Stable versions, or Double-click _**`LaunchMinecraftPreview.bat`**_ to launch Preview versions.
+   - In the BetterRenderDragon folder, double-Click _**`LaunchMinecraft.bat`**_ to launch Stable versions, or Double-click _**`LaunchMinecraftPreview.bat`**_ to launch Preview versions.
 
 ### Usage
 * Press **`F6`** to show or hide the BetterRenderDragon Menu!
