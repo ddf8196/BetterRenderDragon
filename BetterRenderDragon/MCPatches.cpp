@@ -16,9 +16,18 @@ void MCPatches_Init() {
 			((char*)ptr)[6] = 0x7F;
 			((char*)ptr)[59] = 0x7F;
 			VirtualProtect((void*)ptr, 60, oldProtect, &tmp);
-		}
-		else {
-			printf("Failed to patch bgfx::d3d12rtx::RendererContextD3D12RTX::init\n");
+		} else {
+			//1.20.30.21 preview
+			uintptr_t ptr2 = FindSignature("83 39 65 ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? 83 39 65");
+			if (ptr2) {
+				DWORD oldProtect, tmp;
+				VirtualProtect((void*)ptr2, 60, PAGE_READWRITE, &oldProtect);
+				((char*)ptr2)[2] = 0x7F;
+				((char*)ptr2)[52] = 0x7F;
+				VirtualProtect((void*)ptr2, 60, oldProtect, &tmp);
+			} else {
+				printf("Failed to patch bgfx::d3d12rtx::RendererContextD3D12RTX::init\n");
+			}
 		}
 	}
 

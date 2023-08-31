@@ -95,6 +95,12 @@ void MCHooks_Init() {
 			"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 45 0F B6 F1 49 8B F8 48 8B F2 48 8B D9"
 		);
 	}
+	if (!resourcePackManagerPtr) {
+		//1.20.30.21 preview
+		resourcePackManagerPtr = FindSignature(
+			"4C 8B DC 53 55 56 57 41 56 48 81 EC ? ? ? ? 41 0F B6 E9 49 8B D8 48 8B F2 48 8B F9"
+		);
+	}
 	if (resourcePackManagerPtr) {
 		Hook(ResourcePackManager_constructor, (void*)resourcePackManagerPtr);
 	} else {
@@ -105,11 +111,20 @@ void MCHooks_Init() {
 	uintptr_t readFilePtr = FindSignature(
 		"48 89 5C 24 ? 55 56 57 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 70 49 8B C0"
 	);
-	if (!readFilePtr)
+	if (!readFilePtr) {
 		//1.20.0.23 preview
 		readFilePtr = FindSignature(
 			"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 20 49 8B C0"
 		);
+	}
+	if (!readFilePtr) {
+		//1.20.30.21 preview
+		readFilePtr = FindSignature(
+			"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 49 8B C0 48 8B FA"
+		);
+	}
+	
+
 	if (readFilePtr) {
 		Hook(readFile, (void*)readFilePtr);
 	} else {
