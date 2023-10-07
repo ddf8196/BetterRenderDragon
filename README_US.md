@@ -1,4 +1,4 @@
-English | [简体中文](README.md) 
+English | [Deutsch](README_DE.md) | [简体中文](README.md) 
 
 # BetterRenderDragon
 Enhancement Mod for the RenderDragon Engine of _**Minecraft: Bedrock Edition**_
@@ -32,5 +32,5 @@ _**0. YOU HAVE TO DO THIS EVERYTIME YOU WANT TO USE BRD!**_
 * Running Deferred Rendering requires a RayTracing resource pack to be on!
 
 ## Minimum requirements
-* Direct3D 11 (cannot enable deferred rendering)
-* To enable deferred rendering, the minimum requirement is Direct3D 12
+* DirectX 11 (cannot enable deferred rendering)
+* To enable deferred rendering, the minimum requirement is DirectX 12

@@ -1,4 +1,4 @@
-简体中文 | [English](README_US.md) 
+简体中文 | [English](README_US.md) | [Deutsch](README_DE.md)
 
 # BetterRenderDragon
 为渲染龙添加更多功能
