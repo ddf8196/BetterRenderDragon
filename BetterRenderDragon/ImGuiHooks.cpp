@@ -303,8 +303,9 @@ namespace ImGuiD3D12 {
 	CComPtr<ID3D12DescriptorHeap> DescriptorHeapImGuiRender;
 	CComPtr<ID3D12CommandAllocator> CommandAllocator;
 	CComPtr<ID3D12GraphicsCommandList> CommandList;
-
+	CComPtr<ID3D12Fence> Fence;
 	ID3D12CommandQueue* CommandQueue;
+	std::atomic_uint64_t CurrentFence = 0;
 
 	struct BackBufferContext {
 		ID3D12Resource* Resource;
@@ -373,6 +374,10 @@ namespace ImGuiD3D12 {
 				return false;
 			}
 
+			if (Device->CreateFence(CurrentFence, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&Fence)) != S_OK) {
+				return false;
+			}
+
 			D3D12_DESCRIPTOR_HEAP_DESC DescriptorBackBuffers;
 			DescriptorBackBuffers.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 			DescriptorBackBuffers.NumDescriptors = BufferCount;
@@ -424,6 +429,14 @@ namespace ImGuiD3D12 {
 		CommandList->ResourceBarrier(1, &Barrier);
 		CommandList->Close();
 		CommandQueue->ExecuteCommandLists(1, commandLists);
+
+		CommandQueue->Signal(Fence, ++CurrentFence);
+		if (Fence->GetCompletedValue() < CurrentFence) {
+			HANDLE eventHandle = CreateEventEx(nullptr, nullptr, NULL, EVENT_ALL_ACCESS);
+			Fence->SetEventOnCompletion(CurrentFence, eventHandle);
+			WaitForSingleObject(eventHandle, INFINITE);
+			CloseHandle(eventHandle);
+		}
 	}
 
 	PFN_IDXGISwapChain_Present Original_IDXGISwapChain_Present = nullptr;
