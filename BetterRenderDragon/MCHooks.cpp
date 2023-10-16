@@ -123,8 +123,13 @@ void MCHooks_Init() {
 			"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 49 8B C0 48 8B FA"
 		);
 	}
+	if (!readFilePtr) {
+		//1.20.30.02
+		readFilePtr = FindSignature(
+			"48 89 5C 24 ? 55 56 57 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 49 8B C0"
+		);
+	}
 	
-
 	if (readFilePtr) {
 		Hook(readFile, (void*)readFilePtr);
 	} else {
