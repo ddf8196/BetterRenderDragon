@@ -122,10 +122,12 @@ void updateImGui() {
 	//static bool showDemo = false;
 	static bool showModuleManager = false;
 	static bool showAbout = false;
+	static bool showChangelog = false;
 
 	bool resetLayout = false;
 	bool moduleManagerRequestFocus = false;
 	bool aboutRequestFocus = false;
+	bool changelogRequestFocus = false;
 
 	updateKeys();
 	updateOptions();
@@ -157,6 +159,8 @@ void updateImGui() {
 						moduleManagerRequestFocus = true;
 					if (showAbout && ImGui::MenuItem("About", NULL))
 						aboutRequestFocus = true;
+					if (showChangelog && ImGui::MenuItem("Changelog", NULL))
+						changelogRequestFocus = true;
 					//if (showDemo)
 					//	ImGui::MenuItem("ImGui Demo Window", NULL);
 					ImGui::EndMenu();
@@ -165,6 +169,13 @@ void updateImGui() {
 					if (ImGui::MenuItem("About", NULL)) {
 						showAbout = true;
 						aboutRequestFocus = true;
+					}
+					ImGui::EndMenu();
+				}
+				if (ImGui::BeginMenu("Changelog")) {
+					if (ImGui::MenuItem("Changelog", NULL)) {
+						showChangelog = true;
+						changelogRequestFocus = true;
 					}
 					ImGui::EndMenu();
 				}
@@ -272,6 +283,17 @@ void updateImGui() {
 			if (ImGui::Begin("BetterRenderDragon - About", &showAbout)) {
 				ImGui::Text("BetterRenderDragon %s", BetterRDVersion);
 				ImGui::Text("https://github.com/ddf8196/BetterRenderDragon");
+			}
+			ImGui::End();
+		}
+
+		if (showChangelog) {
+			if (changelogRequestFocus)
+				ImGui::SetNextWindowFocus();
+			if (ImGui::Begin("BetterRenderDragon - Changelog", &showChangelog)) {
+				ImGui::Text("V1.3.3\n Support 1.20.1");
+				ImGui::Text("V1.3.4\n Support 1.20.10\n No longer support version below 1.20.10 ");
+				ImGui::Text("V1.3.5\n Support 1.20.32\n Fixed ImGui flickering on some devices\n Removed Vanilla2Deferred option");
 			}
 			ImGui::End();
 		}
