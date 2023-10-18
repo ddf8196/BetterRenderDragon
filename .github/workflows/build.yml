@@ -1,0 +1,46 @@
+name: Build BetterRenderDragon
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  SOLUTION_FILE_PATH: .
+  BUILD_CONFIGURATION: Release
+  GITHUB_WORKSPACE: .
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    strategy:
+        fail-fast: false
+        matrix:
+          abi: ["x64"]
+ 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1.3.1
+      
+      
+      - name: Build
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{ matrix.abi }} ${{env.SOLUTION_FILE_PATH}}
+      
+      - name: Upload dll
+        uses: actions/upload-artifact@v3
+        with:
+          name: BetterRenderDragon.dll
+          path: ./build/BetterRenderDragon.dll
+
+      - name: Upload pdb
+        uses: actions/upload-artifact@v3
+        with:
+          name: BetterRenderDragon.pdb
+          path: ./build/BetterRenderDragon.pdb
