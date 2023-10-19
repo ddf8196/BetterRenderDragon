@@ -328,6 +328,7 @@ namespace ImGuiD3D12 {
 	CComPtr<ID3D12Fence> Fence;
 	ID3D12CommandQueue* CommandQueue;
 	std::atomic_uint64_t CurrentFence = 0;
+	HANDLE FenceEventHandle = nullptr;
 
 	struct BackBufferContext {
 		ID3D12Resource* Resource;
@@ -400,6 +401,11 @@ namespace ImGuiD3D12 {
 				return false;
 			}
 
+			FenceEventHandle = CreateEventEx(nullptr, nullptr, NULL, EVENT_ALL_ACCESS);
+			if (!FenceEventHandle) {
+				return false;
+			}
+
 			D3D12_DESCRIPTOR_HEAP_DESC DescriptorBackBuffers;
 			DescriptorBackBuffers.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 			DescriptorBackBuffers.NumDescriptors = BufferCount;
@@ -454,10 +460,8 @@ namespace ImGuiD3D12 {
 
 		CommandQueue->Signal(Fence, ++CurrentFence);
 		if (Fence->GetCompletedValue() < CurrentFence) {
-			HANDLE eventHandle = CreateEventEx(nullptr, nullptr, NULL, EVENT_ALL_ACCESS);
-			Fence->SetEventOnCompletion(CurrentFence, eventHandle);
-			WaitForSingleObject(eventHandle, INFINITE);
-			CloseHandle(eventHandle);
+			Fence->SetEventOnCompletion(CurrentFence, FenceEventHandle);
+			WaitForSingleObject(FenceEventHandle, INFINITE);
 		}
 	}
 
