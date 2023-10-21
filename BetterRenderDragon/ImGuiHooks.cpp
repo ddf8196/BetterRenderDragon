@@ -54,7 +54,7 @@ void updateOptions() {
 	static bool performanceEnabled = Options::performanceEnabled;
 	static bool vanilla2DeferredEnabled = Options::vanilla2DeferredEnabled;
 	static bool deferredRenderingEnabled = Options::deferredRenderingEnabled;
-	static bool limitShaderModel = Options::limitShaderModel;
+	static bool forceEnableDeferredTechnicalPreview = Options::forceEnableDeferredTechnicalPreview;
 	static bool disableRendererContextD3D12RTX = Options::disableRendererContextD3D12RTX;
 	static bool materialBinLoaderEnabled = Options::materialBinLoaderEnabled;
 	static bool redirectShaders = Options::redirectShaders;
@@ -65,7 +65,7 @@ void updateOptions() {
 		|| performanceEnabled != Options::performanceEnabled
 		|| vanilla2DeferredEnabled != Options::vanilla2DeferredEnabled
 		|| deferredRenderingEnabled != Options::deferredRenderingEnabled
-		|| limitShaderModel != Options::limitShaderModel
+		|| forceEnableDeferredTechnicalPreview != Options::forceEnableDeferredTechnicalPreview
 		|| disableRendererContextD3D12RTX != Options::disableRendererContextD3D12RTX
 		|| materialBinLoaderEnabled != Options::materialBinLoaderEnabled
 		|| redirectShaders != Options::redirectShaders
@@ -79,7 +79,7 @@ void updateOptions() {
 		performanceEnabled = Options::performanceEnabled;
 		vanilla2DeferredEnabled = Options::vanilla2DeferredEnabled;
 		deferredRenderingEnabled = Options::deferredRenderingEnabled;
-		limitShaderModel = Options::limitShaderModel;
+		forceEnableDeferredTechnicalPreview = Options::forceEnableDeferredTechnicalPreview;
 		disableRendererContextD3D12RTX = Options::disableRendererContextD3D12RTX;
 		materialBinLoaderEnabled = Options::materialBinLoaderEnabled;
 		redirectShaders = Options::redirectShaders;
@@ -137,8 +137,10 @@ void updateImGui() {
 		auto& io = ImGui::GetIO();
 
 		ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(300, 250), ImGuiCond_FirstUseEver);
-		if (ImGui::Begin("BetterRenderDragon", &Options::showImGui, ImGuiWindowFlags_MenuBar)) {
+		ImGui::SetNextWindowSize(ImVec2(340, 275), ImGuiCond_FirstUseEver);
+		ImGuiWindowFlags mainWindowFlags = ImGuiWindowFlags_MenuBar;
+
+		if (ImGui::Begin("BetterRenderDragon", &Options::showImGui, mainWindowFlags)) {
 			if (ImGui::BeginMenuBar()) {
 				if (ImGui::BeginMenu("View")) {
 					if (ImGui::MenuItem("Open Module Manager", NULL)) {
@@ -196,7 +198,10 @@ void updateImGui() {
 				if (!Options::vanilla2DeferredAvailable)
 					ImGui::BeginDisabled();
 				ImGui::Indent();
-				//ImGui::Checkbox("Enable Deferred Rendering", &Options::deferredRenderingEnabled);
+				if (Options::newVideoSettingsAvailable)
+					ImGui::Checkbox("Force Enable Deferred Technical Preview", &Options::forceEnableDeferredTechnicalPreview);
+				else
+					ImGui::Checkbox("Enable Deferred Rendering", &Options::deferredRenderingEnabled);
 				ImGui::Checkbox("Disable RTX (Requires restart)", &Options::disableRendererContextD3D12RTX);
 				ImGui::Unindent();
 				if (!Options::vanilla2DeferredAvailable)
@@ -238,7 +243,7 @@ void updateImGui() {
 			ImGui::NewLine();
 		}
 		ImGui::End();
-
+		
 		if (showModuleManager) {
 			if (moduleManagerRequestFocus)
 				ImGui::SetNextWindowFocus();
@@ -363,13 +368,7 @@ namespace ImGuiD3D12 {
 
 	bool initializeImguiBackend(IDXGISwapChain* pSwapChain) {
 		if (SUCCEEDED(pSwapChain->GetDevice(IID_ID3D12Device, (void**)&Device))) {
-			bool dxr11 = false;
-			D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = { 0 };
-			if (SUCCEEDED(Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5)))) {
-				dxr11 = options5.RaytracingTier >= 11;
-			}
 			Options::vanilla2DeferredAvailable = true;
-			Options::limitShaderModel = !dxr11;
 
 			initializeImgui();
 
@@ -528,7 +527,6 @@ namespace ImGuiD3D11 {
 
 	bool initializeImguiBackend(IDXGISwapChain* pSwapChain) {
 		Options::vanilla2DeferredAvailable = false;
-		Options::limitShaderModel = false;
 
 		initializeImgui();
 

@@ -13,7 +13,8 @@ public:
 	static bool vanilla2DeferredAvailable;
 	static bool vanilla2DeferredEnabled;
 	static bool deferredRenderingEnabled;
-	static bool limitShaderModel;
+	static bool newVideoSettingsAvailable;
+	static bool forceEnableDeferredTechnicalPreview;
 	static bool disableRendererContextD3D12RTX;
 
 	static bool materialBinLoaderEnabled;

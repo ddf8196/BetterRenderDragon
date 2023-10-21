@@ -61,4 +61,26 @@ void MCPatches_Init() {
 	} else {
 		printf("Failed to patch dragon::bgfximpl::toSamplerFlags\n");
 	}
+
+	//MinecraftGame::_updateLightingModel
+	//1.20.30.02
+	uintptr_t ptr4 = FindSignature("83 FB 01 75 11 48 8B 01 48 8B 40 40 FF 15 ? ? ? ? 32 C0 EB 02");
+	if (ptr4) {
+		DWORD oldProtect, tmp;
+		VirtualProtect((void*)ptr4, 22, PAGE_READWRITE, &oldProtect);
+		((char*)ptr4)[18] = 0xB0;
+		((char*)ptr4)[19] = 0x01;
+		VirtualProtect((void*)ptr4, 22, oldProtect, &tmp);
+	} else {
+		//1.20.30.20 preview
+		ptr4 = FindSignature("83 FB 01 75 1A 48 8B 01 48 8B 40 40 FF 15 ? ? ? ? 84 C0 74 05 45 84 E4 75 04");
+		if (ptr4) {
+			DWORD oldProtect, tmp;
+			VirtualProtect((void*)ptr4, 27, PAGE_READWRITE, &oldProtect);
+			((char*)ptr4)[3] = 0x74;
+			VirtualProtect((void*)ptr4, 27, oldProtect, &tmp);
+		} else {
+			printf("Failed to patch MinecraftGame::_updateLightingModel\n");
+		}
+	}
 }

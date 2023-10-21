@@ -18,7 +18,8 @@ bool Options::windowSettingsEnabled = true;
 bool Options::vanilla2DeferredAvailable = true;
 bool Options::vanilla2DeferredEnabled = true;
 bool Options::deferredRenderingEnabled = false;
-bool Options::limitShaderModel = true;
+bool Options::newVideoSettingsAvailable = false;
+bool Options::forceEnableDeferredTechnicalPreview = false;
 bool Options::disableRendererContextD3D12RTX = false;
 
 bool Options::materialBinLoaderEnabled = true;
@@ -51,8 +52,7 @@ std::string getLocalStatePath() {
 		printf("%s %d hr=0x%08X\n", __FUNCTION__, __LINE__, hResult);
 		return "";
 	}
-		
-
+	
 	ComPtr<IApplicationData> applicationData;
 	hResult = applicationDataStatics->get_Current(&applicationData);
 	if (FAILED(hResult)) {
@@ -128,12 +128,15 @@ bool Options::load() {
 		return false;
 	}
 
-	showImGui = data["showImGui"];
+	if (data.contains("showImGui"))
+		showImGui = data["showImGui"];
 
-	performanceEnabled = data["performanceEnabled"];
+	if (data.contains("performanceEnabled"))
+		performanceEnabled = data["performanceEnabled"];
 
 #if 0
-	windowSettingsEnabled = data["windowSettingsEnabled"];
+	if (data.contains("windowSettingsEnabled")
+		windowSettingsEnabled = data["windowSettingsEnabled"];
 	if (data.contains("uikey") == false)
 		uikey = (int)ImGuiKey_Delete;
 	else {
@@ -143,14 +146,22 @@ bool Options::load() {
 	}
 #endif
 
-	vanilla2DeferredEnabled = data["vanilla2DeferredEnabled"];
-	deferredRenderingEnabled = data["deferredRenderingEnabled"];
-	disableRendererContextD3D12RTX = data["disableRendererContextD3D12RTX"];
+	if (data.contains("vanilla2DeferredEnabled"))
+		vanilla2DeferredEnabled = data["vanilla2DeferredEnabled"];
+	if (data.contains("deferredRenderingEnabled"))
+		deferredRenderingEnabled = data["deferredRenderingEnabled"];
+	if (data.contains("forceEnableDeferredTechnicalPreview"))
+		forceEnableDeferredTechnicalPreview = data["forceEnableDeferredTechnicalPreview"];
+	if (data.contains("disableRendererContextD3D12RTX"))
+		disableRendererContextD3D12RTX = data["disableRendererContextD3D12RTX"];
 
-	materialBinLoaderEnabled = data["materialBinLoaderEnabled"];
-	redirectShaders = data["redirectShaders"];
+	if (data.contains("materialBinLoaderEnabled"))
+		materialBinLoaderEnabled = data["materialBinLoaderEnabled"];
+	if (data.contains("redirectShaders"))
+		redirectShaders = data["redirectShaders"];
 
-	//customUniformsEnabled = data["customUniformsEnabled"];
+	//if (data.contains("customUniformsEnabled"))
+	//	customUniformsEnabled = data["customUniformsEnabled"];
 
 	return true;
 }
@@ -168,6 +179,7 @@ bool Options::save() {
 
 	data["vanilla2DeferredEnabled"] = vanilla2DeferredEnabled;
 	data["deferredRenderingEnabled"] = deferredRenderingEnabled;
+	data["forceEnableDeferredTechnicalPreview"] = forceEnableDeferredTechnicalPreview;
 	data["disableRendererContextD3D12RTX"] = disableRendererContextD3D12RTX;
 
 	data["materialBinLoaderEnabled"] = materialBinLoaderEnabled;
