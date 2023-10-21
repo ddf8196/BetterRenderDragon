@@ -22,15 +22,15 @@
 
 //=======================================================================================================================================================================
 
-IDXGIFactory2* Factory;
-IUnknown* CoreWindow;
-bool ImGuiInitialized = false;
-bool IsChangingUIKey = false;
-bool JustChangedKey = false;
+IDXGIFactory2* factory;
+IUnknown* coreWindow;
+bool imguiInitialized = false;
+bool isChangingUIKey = false;
+bool justChangedKey = false;
 
-std::string CPUName;
-std::string GPUName;
-std::string RendererType;
+std::string cpuName;
+std::string gpuName;
+std::string rendererType;
 
 //=======================================================================================================================================================================
 
@@ -106,9 +106,9 @@ void updateKeys() {
 	static bool prevToggleImGui = false;
 	static bool prevToggleDeferredRendering = false;
 
-	bool toggleImGui = ImGui::IsKeyPressed((ImGuiKey)Options::uikey) && !JustChangedKey;
+	bool toggleImGui = ImGui::IsKeyPressed((ImGuiKey)Options::uikey) && !justChangedKey;
 	if (!toggleImGui)
-		JustChangedKey = false;
+		justChangedKey = false;
 	if (toggleImGui && !prevToggleImGui)
 		Options::showImGui = !Options::showImGui;
 	prevToggleImGui = toggleImGui;
@@ -326,90 +326,90 @@ void initializeImgui() {
 //=======================================================================================================================================================================
 
 namespace ImGuiD3D12 {
-	CComPtr<ID3D12Device> Device;
-	CComPtr<ID3D12DescriptorHeap> DescriptorHeapBackBuffers;
-	CComPtr<ID3D12DescriptorHeap> DescriptorHeapImGuiRender;
-	ID3D12CommandQueue* CommandQueue;
+	CComPtr<ID3D12Device> device;
+	CComPtr<ID3D12DescriptorHeap> descriptorHeapBackBuffers;
+	CComPtr<ID3D12DescriptorHeap> descriptorHeapImGuiRender;
+	ID3D12CommandQueue* commandQueue;
 
 	struct BackBufferContext {
-		CComPtr<ID3D12CommandAllocator> CommandAllocator;
-		CComPtr<ID3D12GraphicsCommandList> CommandList;
-		ID3D12Resource* Resource = nullptr;
-		D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle = { 0 };
+		CComPtr<ID3D12CommandAllocator> commandAllocator;
+		CComPtr<ID3D12GraphicsCommandList> commandList;
+		ID3D12Resource* resource = nullptr;
+		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = { 0 };
 	};
 
-	uint32_t BufferCount = 0;
-	std::unique_ptr<BackBufferContext[]> BufferContext;
+	uint32_t backBufferCount = 0;
+	std::unique_ptr<BackBufferContext[]> backBufferContext;
 
-	void CreateRT(IDXGISwapChain* swapChain) {
-		const auto RTVDescriptorSize = Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-		D3D12_CPU_DESCRIPTOR_HANDLE RTVHandle = DescriptorHeapBackBuffers->GetCPUDescriptorHandleForHeapStart();
+	void createRT(IDXGISwapChain* swapChain) {
+		const auto rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = descriptorHeapBackBuffers->GetCPUDescriptorHandleForHeapStart();
 
-		for (uint32_t i = 0; i < BufferCount; i++) {
+		for (uint32_t i = 0; i < backBufferCount; i++) {
 			ID3D12Resource* pBackBuffer = nullptr;
-			BufferContext[i].DescriptorHandle = RTVHandle;
+			backBufferContext[i].descriptorHandle = rtvHandle;
 			swapChain->GetBuffer(i, IID_PPV_ARGS(&pBackBuffer));
-			Device->CreateRenderTargetView(pBackBuffer, nullptr, RTVHandle);
-			BufferContext[i].Resource = pBackBuffer;
-			RTVHandle.ptr += RTVDescriptorSize;
+			device->CreateRenderTargetView(pBackBuffer, nullptr, rtvHandle);
+			backBufferContext[i].resource = pBackBuffer;
+			rtvHandle.ptr += rtvDescriptorSize;
 		}
 	}
 
-	void ReleaseRT() {
-		for (size_t i = 0; i < BufferCount; i++) {
-			if (BufferContext[i].Resource) {
-				BufferContext[i].Resource->Release();
-				BufferContext[i].Resource = nullptr;
+	void releaseRT() {
+		for (size_t i = 0; i < backBufferCount; i++) {
+			if (backBufferContext[i].resource) {
+				backBufferContext[i].resource->Release();
+				backBufferContext[i].resource = nullptr;
 			}
 		}
 	}
 
 	bool initializeImguiBackend(IDXGISwapChain* pSwapChain) {
-		if (SUCCEEDED(pSwapChain->GetDevice(IID_ID3D12Device, (void**)&Device))) {
+		if (SUCCEEDED(pSwapChain->GetDevice(IID_ID3D12Device, (void**)&device))) {
 			Options::vanilla2DeferredAvailable = true;
 
 			initializeImgui();
 
-			DXGI_SWAP_CHAIN_DESC Desc;
-			pSwapChain->GetDesc(&Desc);
+			DXGI_SWAP_CHAIN_DESC desc;
+			pSwapChain->GetDesc(&desc);
 
-			BufferCount = Desc.BufferCount;
-			BufferContext.reset(new BackBufferContext[BufferCount]);
+			backBufferCount = desc.BufferCount;
+			backBufferContext.reset(new BackBufferContext[backBufferCount]);
 
-			for (int i = 0; i < BufferCount; i++) {
-				if (Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&BufferContext[i].CommandAllocator)) != S_OK) {
+			for (size_t i = 0; i < backBufferCount; i++) {
+				if (device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&backBufferContext[i].commandAllocator)) != S_OK) {
 					return false;
 				}
 
-				if (Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, BufferContext[i].CommandAllocator, NULL, IID_PPV_ARGS(&BufferContext[i].CommandList)) != S_OK ||
-					BufferContext[i].CommandList->Close() != S_OK) {
+				if (device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, backBufferContext[i].commandAllocator, NULL, IID_PPV_ARGS(&backBufferContext[i].commandList)) != S_OK ||
+					backBufferContext[i].commandList->Close() != S_OK) {
 					return false;
 				}
 			}
 
-			D3D12_DESCRIPTOR_HEAP_DESC DescriptorImGuiRender = {};
-			DescriptorImGuiRender.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-			DescriptorImGuiRender.NumDescriptors = BufferCount;
-			DescriptorImGuiRender.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+			D3D12_DESCRIPTOR_HEAP_DESC descriptorImGuiRender = {};
+			descriptorImGuiRender.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+			descriptorImGuiRender.NumDescriptors = backBufferCount;
+			descriptorImGuiRender.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
-			if (Device->CreateDescriptorHeap(&DescriptorImGuiRender, IID_PPV_ARGS(&DescriptorHeapImGuiRender)) != S_OK) {
+			if (device->CreateDescriptorHeap(&descriptorImGuiRender, IID_PPV_ARGS(&descriptorHeapImGuiRender)) != S_OK) {
 				return false;
 			}
 
-			D3D12_DESCRIPTOR_HEAP_DESC DescriptorBackBuffers;
-			DescriptorBackBuffers.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-			DescriptorBackBuffers.NumDescriptors = BufferCount;
-			DescriptorBackBuffers.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-			DescriptorBackBuffers.NodeMask = 1;
+			D3D12_DESCRIPTOR_HEAP_DESC descriptorBackBuffers;
+			descriptorBackBuffers.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+			descriptorBackBuffers.NumDescriptors = backBufferCount;
+			descriptorBackBuffers.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+			descriptorBackBuffers.NodeMask = 1;
 
-			if (Device->CreateDescriptorHeap(&DescriptorBackBuffers, IID_PPV_ARGS(&DescriptorHeapBackBuffers)) != S_OK) {
+			if (device->CreateDescriptorHeap(&descriptorBackBuffers, IID_PPV_ARGS(&descriptorHeapBackBuffers)) != S_OK) {
 				return false;
 			}
 
-			CreateRT(pSwapChain);
+			createRT(pSwapChain);
 
-			ImGui_ImplWinRT_Init(CoreWindow);
-			ImGui_ImplDX12_Init(Device, BufferCount, DXGI_FORMAT_R8G8B8A8_UNORM, DescriptorHeapImGuiRender, DescriptorHeapImGuiRender->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapImGuiRender->GetGPUDescriptorHandleForHeapStart());
+			ImGui_ImplWinRT_Init(coreWindow);
+			ImGui_ImplDX12_Init(device, backBufferCount, DXGI_FORMAT_R8G8B8A8_UNORM, descriptorHeapImGuiRender, descriptorHeapImGuiRender->GetCPUDescriptorHandleForHeapStart(), descriptorHeapImGuiRender->GetGPUDescriptorHandleForHeapStart());
 			ImGui_ImplDX12_CreateDeviceObjects();
 		}
 		return true;
@@ -421,32 +421,32 @@ namespace ImGuiD3D12 {
 
 		updateImGui();
 
-		BackBufferContext& CurrentBufferContext = BufferContext[swapChain->GetCurrentBackBufferIndex()];
-		CurrentBufferContext.CommandAllocator->Reset();
+		BackBufferContext& currentBufferContext = backBufferContext[swapChain->GetCurrentBackBufferIndex()];
+		currentBufferContext.commandAllocator->Reset();
 
-		D3D12_RESOURCE_BARRIER Barrier;
-		Barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		Barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		Barrier.Transition.pResource = CurrentBufferContext.Resource;
-		Barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		Barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-		Barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource = currentBufferContext.resource;
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-		ID3D12DescriptorHeap* descriptorHeaps[1] = { DescriptorHeapImGuiRender.p };
-		CurrentBufferContext.CommandList->Reset(CurrentBufferContext.CommandAllocator, nullptr);
-		CurrentBufferContext.CommandList->ResourceBarrier(1, &Barrier);
-		CurrentBufferContext.CommandList->OMSetRenderTargets(1, &CurrentBufferContext.DescriptorHandle, FALSE, nullptr);
-		CurrentBufferContext.CommandList->SetDescriptorHeaps(1, descriptorHeaps);
+		ID3D12DescriptorHeap* descriptorHeaps[1] = { descriptorHeapImGuiRender.p };
+		currentBufferContext.commandList->Reset(currentBufferContext.commandAllocator, nullptr);
+		currentBufferContext.commandList->ResourceBarrier(1, &barrier);
+		currentBufferContext.commandList->OMSetRenderTargets(1, &currentBufferContext.descriptorHandle, FALSE, nullptr);
+		currentBufferContext.commandList->SetDescriptorHeaps(1, descriptorHeaps);
 
 		ImGui::Render();
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), CurrentBufferContext.CommandList);
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), currentBufferContext.commandList);
 
-		ID3D12CommandList* commandLists[1] = { CurrentBufferContext.CommandList.p };
-		Barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		Barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-		CurrentBufferContext.CommandList->ResourceBarrier(1, &Barrier);
-		CurrentBufferContext.CommandList->Close();
-		CommandQueue->ExecuteCommandLists(1, commandLists);
+		ID3D12CommandList* commandLists[1] = { currentBufferContext.commandList.p };
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+		currentBufferContext.commandList->ResourceBarrier(1, &barrier);
+		currentBufferContext.commandList->Close();
+		commandQueue->ExecuteCommandLists(1, commandLists);
 	}
 
 	PFN_IDXGISwapChain_Present Original_IDXGISwapChain_Present = nullptr;
@@ -456,10 +456,10 @@ namespace ImGuiD3D12 {
 			return Original_IDXGISwapChain_Present(This, SyncInterval, Flags);
 		}
 
-		if (!ImGuiInitialized) {
+		if (!imguiInitialized) {
 			printf("Initializing ImGui on Direct3D 12\n");
 			if (initializeImguiBackend(This)) {
-				ImGuiInitialized = true;
+				imguiInitialized = true;
 			} else {
 				printf("ImGui is not initialized\n");
 				return Original_IDXGISwapChain_Present(This, SyncInterval, Flags);
@@ -473,9 +473,9 @@ namespace ImGuiD3D12 {
 
 	PFN_IDXGISwapChain_ResizeBuffers Original_IDXGISwapChain_ResizeBuffers;
 	HRESULT STDMETHODCALLTYPE IDXGISwapChain_ResizeBuffers_Hook(IDXGISwapChain* This, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags) {
-		ReleaseRT();
+		releaseRT();
 		HRESULT hResult = Original_IDXGISwapChain_ResizeBuffers(This, BufferCount, Width, Height, NewFormat, SwapChainFlags);
-		CreateRT(This);
+		createRT(This);
 		return hResult;
 	}
 }
@@ -483,29 +483,29 @@ namespace ImGuiD3D12 {
 //=======================================================================================================================================================================
 
 namespace ImGuiD3D11 {
-	ID3D11Device* Device;
-	CComPtr<ID3D11DeviceContext> DeviceContext;
+	ID3D11Device* device;
+	CComPtr<ID3D11DeviceContext> deviceContext;
 
-	uint32_t BufferCount = 0;
-	ID3D11RenderTargetView** RenderTargetViews;
+	uint32_t backBufferCount = 0;
+	ID3D11RenderTargetView** renderTargetViews;
 
-	void CreateRT(IDXGISwapChain* swapChain) {
-		for (uint32_t i = 0; i < BufferCount; i++) {
+	void createRT(IDXGISwapChain* swapChain) {
+		for (uint32_t i = 0; i < backBufferCount; i++) {
 			CComPtr<ID3D11Resource> backBuffer;
 			swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer));
 
 			ID3D11RenderTargetView* rtv;
-			Device->CreateRenderTargetView(backBuffer, nullptr, &rtv);
+			device->CreateRenderTargetView(backBuffer, nullptr, &rtv);
 
-			RenderTargetViews[i] = rtv;
+			renderTargetViews[i] = rtv;
 		}
 	}
 
-	void ReleaseRT() {
-		for (size_t i = 0; i < BufferCount; i++) {
-			if (RenderTargetViews[i]) {
-				RenderTargetViews[i]->Release();
-				RenderTargetViews[i] = nullptr;
+	void releaseRT() {
+		for (size_t i = 0; i < backBufferCount; i++) {
+			if (renderTargetViews[i]) {
+				renderTargetViews[i]->Release();
+				renderTargetViews[i] = nullptr;
 			}
 		}
 	}
@@ -515,18 +515,18 @@ namespace ImGuiD3D11 {
 
 		initializeImgui();
 
-		DXGI_SWAP_CHAIN_DESC Desc;
-		pSwapChain->GetDesc(&Desc);
+		DXGI_SWAP_CHAIN_DESC desc;
+		pSwapChain->GetDesc(&desc);
 
-		BufferCount = Desc.BufferCount;
-		RenderTargetViews = new ID3D11RenderTargetView*[BufferCount];
+		backBufferCount = desc.BufferCount;
+		renderTargetViews = new ID3D11RenderTargetView*[backBufferCount];
 
-		Device->GetImmediateContext(&DeviceContext);
+		device->GetImmediateContext(&deviceContext);
 
-		CreateRT(pSwapChain);
+		createRT(pSwapChain);
 
-		ImGui_ImplWinRT_Init(CoreWindow);
-		ImGui_ImplDX11_Init(Device, DeviceContext);
+		ImGui_ImplWinRT_Init(coreWindow);
+		ImGui_ImplDX11_Init(device, deviceContext);
 		ImGui_ImplDX11_CreateDeviceObjects();
 
 		return true;
@@ -538,8 +538,8 @@ namespace ImGuiD3D11 {
 
 		updateImGui();
 
-		ID3D11RenderTargetView* currentRTV = RenderTargetViews[swapChain->GetCurrentBackBufferIndex()];
-		DeviceContext->OMSetRenderTargets(1, &currentRTV, nullptr);
+		ID3D11RenderTargetView* currentRTV = renderTargetViews[swapChain->GetCurrentBackBufferIndex()];
+		deviceContext->OMSetRenderTargets(1, &currentRTV, nullptr);
 
 		ImGui::Render();
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -552,7 +552,7 @@ namespace ImGuiD3D11 {
 			return Original_IDXGISwapChain_Present(This, SyncInterval, Flags);
 		}
 
-		if (ImGuiInitialized) {
+		if (imguiInitialized) {
 			renderImGui(swapChain3);
 		}
 
@@ -561,9 +561,9 @@ namespace ImGuiD3D11 {
 
 	PFN_IDXGISwapChain_ResizeBuffers Original_IDXGISwapChain_ResizeBuffers;
 	HRESULT STDMETHODCALLTYPE IDXGISwapChain_ResizeBuffers_Hook(IDXGISwapChain* This, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags) {
-		ReleaseRT();
+		releaseRT();
 		HRESULT hResult = Original_IDXGISwapChain_ResizeBuffers(This, BufferCount, Width, Height, NewFormat, SwapChainFlags);
-		CreateRT(This);
+		createRT(This);
 		return hResult;
 	}
 }
@@ -573,7 +573,7 @@ namespace ImGuiD3D11 {
 PFN_IDXGIFactory2_CreateSwapChainForCoreWindow Original_IDXGIFactory2_CreateSwapChainForCoreWindow;
 HRESULT STDMETHODCALLTYPE IDXGIFactory2_CreateSwapChainForCoreWindow_Hook(IDXGIFactory2* This, IUnknown* pDevice, IUnknown* pWindow, const DXGI_SWAP_CHAIN_DESC1* pDesc, IDXGIOutput* pRestrictToOutput, IDXGISwapChain1** ppSwapChain) {
 	if (pWindow)
-		CoreWindow = pWindow;
+		coreWindow = pWindow;
 
 	HRESULT hResult = Original_IDXGIFactory2_CreateSwapChainForCoreWindow(This, pDevice, pWindow, pDesc, pRestrictToOutput, ppSwapChain);
 	if (SUCCEEDED(hResult)) {
@@ -582,7 +582,7 @@ HRESULT STDMETHODCALLTYPE IDXGIFactory2_CreateSwapChainForCoreWindow_Hook(IDXGIF
 		CComPtr<ID3D11Device> d3d11Device;
 		if (SUCCEEDED(pDevice->QueryInterface(&d3d12CommandQueue))) {
 			//Direct3D 12
-			ImGuiD3D12::CommandQueue = (ID3D12CommandQueue*)pDevice;
+			ImGuiD3D12::commandQueue = (ID3D12CommandQueue*)pDevice;
 			if (!ImGuiD3D12::Original_IDXGISwapChain_Present)
 				ReplaceVtable(*(void**)swapChain, 8, (void**)&ImGuiD3D12::Original_IDXGISwapChain_Present, ImGuiD3D12::IDXGISwapChain_Present_Hook);
 			if (!ImGuiD3D12::Original_IDXGISwapChain_ResizeBuffers)
@@ -590,14 +590,14 @@ HRESULT STDMETHODCALLTYPE IDXGIFactory2_CreateSwapChainForCoreWindow_Hook(IDXGIF
 			//When the graphics API used by RenderDragon is D3D12, this function will be called in a non-main thread and later IDXGISwapChain::Present will be called three times in the main thread, so initialize ImGui later in IDXGISwapChain::Present
 		} else if (SUCCEEDED(pDevice->QueryInterface(&d3d11Device))) {
 			//Direct3D 11
-			ImGuiD3D11::Device = (ID3D11Device*)pDevice;
+			ImGuiD3D11::device = (ID3D11Device*)pDevice;
 			if (!ImGuiD3D11::Original_IDXGISwapChain_Present)
 				ReplaceVtable(*(void**)swapChain, 8, (void**)&ImGuiD3D11::Original_IDXGISwapChain_Present, ImGuiD3D11::IDXGISwapChain_Present_Hook);
 			if (!ImGuiD3D11::Original_IDXGISwapChain_ResizeBuffers)
 				ReplaceVtable(*(void**)swapChain, 13, (void**)&ImGuiD3D11::Original_IDXGISwapChain_ResizeBuffers, ImGuiD3D11::IDXGISwapChain_ResizeBuffers_Hook);
 			// When the graphics API used by RenderDragon is D3D11, this function will be called in the main thread, and IDXGISwapChain::Present will all be called in a non-main thread, so initialize ImGui here immediately
 			printf("Initializing ImGui on Direct3D 11\n");
-			if (!(ImGuiInitialized = ImGuiD3D11::initializeImguiBackend(swapChain))) {
+			if (!(imguiInitialized = ImGuiD3D11::initializeImguiBackend(swapChain))) {
 				printf("Failed to initialize ImGui on Direct3D 11\n");
 			}
 		} else {
@@ -617,7 +617,7 @@ DeclareHook(CreateDXGIFactory1, HRESULT, REFIID riid, void** ppFactory) {
 		if (!Original_IDXGIFactory2_CreateSwapChainForCoreWindow)
 			ReplaceVtable(*(void**)factory, 16, (void**)&Original_IDXGIFactory2_CreateSwapChainForCoreWindow, IDXGIFactory2_CreateSwapChainForCoreWindow_Hook);
 
-		Factory = factory;
+		factory = factory;
 	}
 	return hResult;
 }
