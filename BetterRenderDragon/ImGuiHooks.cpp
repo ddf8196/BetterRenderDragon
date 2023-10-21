@@ -6,6 +6,7 @@
 #include <d3d11.h>
 
 #include <string>
+#include <memory>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -328,20 +329,17 @@ namespace ImGuiD3D12 {
 	CComPtr<ID3D12Device> Device;
 	CComPtr<ID3D12DescriptorHeap> DescriptorHeapBackBuffers;
 	CComPtr<ID3D12DescriptorHeap> DescriptorHeapImGuiRender;
-	CComPtr<ID3D12CommandAllocator> CommandAllocator;
-	CComPtr<ID3D12GraphicsCommandList> CommandList;
-	CComPtr<ID3D12Fence> Fence;
 	ID3D12CommandQueue* CommandQueue;
-	std::atomic_uint64_t CurrentFence = 0;
-	HANDLE FenceEventHandle = nullptr;
 
 	struct BackBufferContext {
-		ID3D12Resource* Resource;
-		D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle;
+		CComPtr<ID3D12CommandAllocator> CommandAllocator;
+		CComPtr<ID3D12GraphicsCommandList> CommandList;
+		ID3D12Resource* Resource = nullptr;
+		D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle = { 0 };
 	};
 
 	uint32_t BufferCount = 0;
-	BackBufferContext* BufferContext;
+	std::unique_ptr<BackBufferContext[]> BufferContext;
 
 	void CreateRT(IDXGISwapChain* swapChain) {
 		const auto RTVDescriptorSize = Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -376,7 +374,18 @@ namespace ImGuiD3D12 {
 			pSwapChain->GetDesc(&Desc);
 
 			BufferCount = Desc.BufferCount;
-			BufferContext = new BackBufferContext[BufferCount];
+			BufferContext.reset(new BackBufferContext[BufferCount]);
+
+			for (int i = 0; i < BufferCount; i++) {
+				if (Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&BufferContext[i].CommandAllocator)) != S_OK) {
+					return false;
+				}
+
+				if (Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, BufferContext[i].CommandAllocator, NULL, IID_PPV_ARGS(&BufferContext[i].CommandList)) != S_OK ||
+					BufferContext[i].CommandList->Close() != S_OK) {
+					return false;
+				}
+			}
 
 			D3D12_DESCRIPTOR_HEAP_DESC DescriptorImGuiRender = {};
 			DescriptorImGuiRender.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -384,24 +393,6 @@ namespace ImGuiD3D12 {
 			DescriptorImGuiRender.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
 			if (Device->CreateDescriptorHeap(&DescriptorImGuiRender, IID_PPV_ARGS(&DescriptorHeapImGuiRender)) != S_OK) {
-				return false;
-			}
-
-			if (Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&CommandAllocator)) != S_OK) {
-				return false;
-			}
-
-			if (Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, CommandAllocator, NULL, IID_PPV_ARGS(&CommandList)) != S_OK ||
-				CommandList->Close() != S_OK) {
-				return false;
-			}
-
-			if (Device->CreateFence(CurrentFence, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&Fence)) != S_OK) {
-				return false;
-			}
-
-			FenceEventHandle = CreateEventEx(nullptr, nullptr, NULL, EVENT_ALL_ACCESS);
-			if (!FenceEventHandle) {
 				return false;
 			}
 
@@ -431,7 +422,7 @@ namespace ImGuiD3D12 {
 		updateImGui();
 
 		BackBufferContext& CurrentBufferContext = BufferContext[swapChain->GetCurrentBackBufferIndex()];
-		CommandAllocator->Reset();
+		CurrentBufferContext.CommandAllocator->Reset();
 
 		D3D12_RESOURCE_BARRIER Barrier;
 		Barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -442,26 +433,20 @@ namespace ImGuiD3D12 {
 		Barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
 		ID3D12DescriptorHeap* descriptorHeaps[1] = { DescriptorHeapImGuiRender.p };
-		CommandList->Reset(CommandAllocator, nullptr);
-		CommandList->ResourceBarrier(1, &Barrier);
-		CommandList->OMSetRenderTargets(1, &CurrentBufferContext.DescriptorHandle, FALSE, nullptr);
-		CommandList->SetDescriptorHeaps(1, descriptorHeaps);
+		CurrentBufferContext.CommandList->Reset(CurrentBufferContext.CommandAllocator, nullptr);
+		CurrentBufferContext.CommandList->ResourceBarrier(1, &Barrier);
+		CurrentBufferContext.CommandList->OMSetRenderTargets(1, &CurrentBufferContext.DescriptorHandle, FALSE, nullptr);
+		CurrentBufferContext.CommandList->SetDescriptorHeaps(1, descriptorHeaps);
 
 		ImGui::Render();
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), CommandList);
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), CurrentBufferContext.CommandList);
 
-		ID3D12CommandList* commandLists[1] = { CommandList.p };
+		ID3D12CommandList* commandLists[1] = { CurrentBufferContext.CommandList.p };
 		Barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		Barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-		CommandList->ResourceBarrier(1, &Barrier);
-		CommandList->Close();
+		CurrentBufferContext.CommandList->ResourceBarrier(1, &Barrier);
+		CurrentBufferContext.CommandList->Close();
 		CommandQueue->ExecuteCommandLists(1, commandLists);
-
-		CommandQueue->Signal(Fence, ++CurrentFence);
-		if (Fence->GetCompletedValue() < CurrentFence) {
-			Fence->SetEventOnCompletion(CurrentFence, FenceEventHandle);
-			WaitForSingleObject(FenceEventHandle, INFINITE);
-		}
 	}
 
 	PFN_IDXGISwapChain_Present Original_IDXGISwapChain_Present = nullptr;
