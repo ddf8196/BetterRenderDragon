@@ -61,6 +61,7 @@ void updateOptions() {
 	static bool redirectShaders = Options::redirectShaders;
 	static bool customUniformsEnabled = Options::customUniformsEnabled;
 	static bool windowSettingsEnabled = Options::windowSettingsEnabled;
+	static bool vsyncDisabled = Options::vsyncDisabled;
 
 	if (showImGui != Options::showImGui
 		|| performanceEnabled != Options::performanceEnabled
@@ -71,7 +72,8 @@ void updateOptions() {
 		|| materialBinLoaderEnabled != Options::materialBinLoaderEnabled
 		|| redirectShaders != Options::redirectShaders
 		|| customUniformsEnabled != Options::customUniformsEnabled
-		|| windowSettingsEnabled != Options::windowSettingsEnabled) {
+		|| windowSettingsEnabled != Options::windowSettingsEnabled
+		|| vsyncDisabled != Options::vsyncDisabled) {
 
 		Options::dirty = true;
 		saveTimer = 3.0f;
@@ -86,6 +88,7 @@ void updateOptions() {
 		redirectShaders = Options::redirectShaders;
 		customUniformsEnabled = Options::customUniformsEnabled;
 		windowSettingsEnabled = Options::windowSettingsEnabled;
+		vsyncDisabled = Options::vsyncDisabled;
 	}
 
 	//TODO: Put it on a separate thread
@@ -138,7 +141,7 @@ void updateImGui() {
 		auto& io = ImGui::GetIO();
 
 		ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(340, 275), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(340, 300), ImGuiCond_FirstUseEver);
 		ImGuiWindowFlags mainWindowFlags = ImGuiWindowFlags_MenuBar;
 
 		if (ImGui::Begin("BetterRenderDragon", &Options::showImGui, mainWindowFlags)) {
@@ -192,6 +195,7 @@ void updateImGui() {
 				ImGui::Indent();
 				ImGui::Text("FPS: %.01f", io.Framerate);
 				ImGui::Text("Frame Time: %.01fms", io.DeltaTime * 1000.0f);
+				ImGui::Checkbox("Disable VSync", &Options::vsyncDisabled);
 				ImGui::Unindent();
 			}
 
@@ -266,7 +270,6 @@ void updateImGui() {
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0); ImGui::Text("MaterialBinLoader");
 					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##3", &Options::materialBinLoaderEnabled);
-
 #if 0
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0); ImGui::Text("Settings");
@@ -467,7 +470,10 @@ namespace ImGuiD3D12 {
 		}
 
 		renderImGui(swapChain3);
-
+		
+		if(Options::vsyncDisabled) {
+			return Original_IDXGISwapChain_Present(This, 0, DXGI_PRESENT_DO_NOT_WAIT);
+		}
 		return Original_IDXGISwapChain_Present(This, SyncInterval, Flags);
 	}
 
@@ -554,6 +560,10 @@ namespace ImGuiD3D11 {
 
 		if (imguiInitialized) {
 			renderImGui(swapChain3);
+		}
+
+		if(Options::vsyncDisabled) {
+			return Original_IDXGISwapChain_Present(This, 0, DXGI_PRESENT_DO_NOT_WAIT);
 		}
 
 		return Original_IDXGISwapChain_Present(This, SyncInterval, Flags);
