@@ -28,6 +28,8 @@ int Options::uikey = ImGuiKey_F6;
 
 bool Options::customUniformsEnabled = false;
 
+bool Options::vsyncDisabled = true;
+
 std::atomic_bool Options::dirty = false;
 
 std::string Options::optionsDir;
@@ -163,6 +165,9 @@ bool Options::load() {
 	//if (data.contains("customUniformsEnabled"))
 	//	customUniformsEnabled = data["customUniformsEnabled"];
 
+	if (data.contains("vsyncDisabled"))
+		vsyncDisabled = data["vsyncDisabled"];
+
 	return true;
 }
 
@@ -186,6 +191,8 @@ bool Options::save() {
 	data["redirectShaders"] = redirectShaders;
 
 	//data["customUniformsEnabled"] = customUniformsEnabled;
+
+	data["vsyncDisabled"] = vsyncDisabled;
 
 	std::ofstream ofs(optionsFile, std::ofstream::binary);
 	ofs << std::setw(4) << data << std::endl;
