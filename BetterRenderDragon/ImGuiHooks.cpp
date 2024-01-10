@@ -300,6 +300,7 @@ void updateImGui() {
 				ImGui::Text("V1.3.3\n Support 1.20.1");
 				ImGui::Text("V1.3.4\n Support 1.20.10\n No longer support version below 1.20.10 ");
 				ImGui::Text("V1.3.5\n Support 1.20.32\n Fixed ImGui flickering on some devices\n Removed Vanilla2Deferred option");
+				ImGui::Text("V1.3.6\n Support 1.20.40 and 1.20.50\n Added Force Enable Deferred Technical Preview option");
 			}
 			ImGui::End();
 		}
