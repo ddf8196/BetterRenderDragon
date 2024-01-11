@@ -21,6 +21,14 @@ bool shouldForceEnableNewVideoSettings() {
 	return Options::vanilla2DeferredAvailable && Options::vanilla2DeferredEnabled && Options::newVideoSettingsAvailable && Options::forceEnableDeferredTechnicalPreview;
 }
 
+bool(*RayTracingOptions_isDeferredShadingAvailable)(void* This) = nullptr;
+bool RayTracingOptions_isDeferredShadingAvailable_Hook(void* This) {
+	if (shouldForceEnableNewVideoSettings()) {
+		return true;
+	}
+	return RayTracingOptions_isDeferredShadingAvailable(This);
+}
+
 using dragon::rendering::LightingModels;
 
 LightingModels(*RayTracingOptions_getLightingModel)(void* This) = nullptr;
@@ -48,6 +56,7 @@ void RayTracingOptions_setLightingModel_Hook(void* This, LightingModels lighting
 DeclareHook(RayTracingOptions_isRayTracingAvailable, bool, void* This) {
 	printf("RayTracingOptions::isRayTracingAvailable\n");
 
+	ReplaceVtable(*(void**)This, 8, (void**)&RayTracingOptions_isDeferredShadingAvailable, RayTracingOptions_isDeferredShadingAvailable_Hook);
 	ReplaceVtable(*(void**)This, 9, (void**)&RayTracingOptions_getLightingModel, RayTracingOptions_getLightingModel_Hook);
 	ReplaceVtable(*(void**)This, 10, (void**)&RayTracingOptions_setLightingModel, RayTracingOptions_setLightingModel_Hook);
 	bool result = original(This);
