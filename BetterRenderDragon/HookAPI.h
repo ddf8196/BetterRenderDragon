@@ -2,8 +2,8 @@
 
 #include <vector>
 #include <utility>
-#include <Windows.h>
-#include <Psapi.h>
+#include <windows.h>
+#include <psapi.h>
 #include <detours/detours.h>
 
 #define FindSignature(signature) FindSig("Minecraft.Windows.exe", signature)

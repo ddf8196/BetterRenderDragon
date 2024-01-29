@@ -28,7 +28,7 @@ bool imguiInitialized = false;
 bool isChangingUIKey = false;
 bool justChangedKey = false;
 
-std::string cpuName;
+std::string cpuName = getCPUName();
 std::string gpuName;
 std::string rendererType;
 
@@ -100,7 +100,6 @@ void updateOptions() {
 		}
 	}
 }
-
 
 void updateKeys() {
 	static bool prevToggleImGui = false;
@@ -189,9 +188,18 @@ void updateImGui() {
 			ImGui::NewLine();
 
 			if (Options::performanceEnabled && ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
+				static float framerate = io.Framerate;
+				static float deltaTime = io.DeltaTime;
+				static float updateTimer = 0.5f;
+				updateTimer -= io.DeltaTime;
+				if (updateTimer <= 0) {
+					framerate = io.Framerate;
+					deltaTime = io.DeltaTime;
+					updateTimer = 0.5f;
+				}
 				ImGui::Indent();
-				ImGui::Text("FPS: %.01f", io.Framerate);
-				ImGui::Text("Frame Time: %.01fms", io.DeltaTime * 1000.0f);
+				ImGui::Text("FPS: %.01f", framerate);
+				ImGui::Text("Frame Time: %.01fms", deltaTime * 1000.0f);
 				ImGui::Unindent();
 			}
 
@@ -369,6 +377,7 @@ namespace ImGuiD3D12 {
 	bool initializeImguiBackend(IDXGISwapChain* pSwapChain) {
 		if (SUCCEEDED(pSwapChain->GetDevice(IID_ID3D12Device, (void**)&device))) {
 			Options::vanilla2DeferredAvailable = true;
+			rendererType = "Direct3D 12";
 
 			initializeImgui();
 
@@ -514,6 +523,7 @@ namespace ImGuiD3D11 {
 
 	bool initializeImguiBackend(IDXGISwapChain* pSwapChain) {
 		Options::vanilla2DeferredAvailable = false;
+		rendererType = "Direct3D 11";
 
 		initializeImgui();
 

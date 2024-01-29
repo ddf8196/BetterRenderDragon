@@ -4,18 +4,25 @@ void MCPatches_Init();
 
 class ScopedVirtualProtect {
 public:
-    ScopedVirtualProtect(void* addr, size_t size, DWORD newProtect) : addr(addr), size(size) {
-        VirtualProtect(addr, size, newProtect, &oldProtect);
+    ScopedVirtualProtect(void* addr, size_t size, DWORD newProtect, bool instruction = true) : addr(addr), size(size), instruction(instruction) {
+        restore = VirtualProtect(addr, size, newProtect, &oldProtect);
     }
     ~ScopedVirtualProtect() {
-        VirtualProtect(addr, size, oldProtect, &oldProtect);
+        if (restore) {
+            VirtualProtect(addr, size, oldProtect, &oldProtect);
+        }
+        if (instruction) {
+            FlushInstructionCache(GetCurrentProcess(), addr, size);
+        }
     }
 private:
     void* addr;
     size_t size;
     DWORD oldProtect;
+    bool instruction;
+    bool restore;
 };
 
-#define glue1(a, b) a##b
-#define glue(a, b) glue1(a,b)
-#define scopedVP(ptr, size, newProtect) ScopedVirtualProtect glue(svp,__LINE__) ((void*)(ptr), (size), (newProtect));
+#define GLUE1(a, b) a##b
+#define GLUE(a, b) GLUE1(a,b)
+#define ScopedVP(ptr, ...) ScopedVirtualProtect GLUE(svp,__LINE__) ((void*)(ptr), __VA_ARGS__);
