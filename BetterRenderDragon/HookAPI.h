@@ -1,7 +1,11 @@
 #pragma once
 
-#include <vector>
+#include <cstdio>
+#include <string>
 #include <utility>
+#include <vector>
+#include <initializer_list>
+
 #include <windows.h>
 #include <psapi.h>
 #include <detours/detours.h>
@@ -22,6 +26,8 @@ ret _Hook_##name::_hook(__VA_ARGS__)
 #define IsHooked(name) (_Hook_##name::_original != nullptr)
 #define Hook(name, ptr) HookFunction(ptr, (void**)&_Hook_##name::_original, &_Hook_##name::_hook)
 #define Unhook(name) UnhookFunction(_Hook_##name::_original, &_Hook_##name::_hook)
+#define TrySigHook(name, ...) SigHook(#name, __VA_ARGS__, (void**)&_Hook_##name::_original, &_Hook_##name::_hook)
+#define TrySigHookNoWarning(name, ...) SigHook(#name, __VA_ARGS__, (void**)&_Hook_##name::_original, &_Hook_##name::_hook, false)
 
 inline int HookFunction(void* oldFunc, void** outOldFunc, void* newFunc) {
     DetourTransactionBegin();
@@ -56,13 +62,13 @@ inline void ReplaceVtable(void* _vptr, size_t index, void** outOldFunc, void* ne
     VirtualProtect(vptr + index, sizeof(void*), oldProtect, &tmp);
 }
 
-inline uintptr_t FindSig(const char* moduleName, const char* signature) {
-    HMODULE moduleHandle = GetModuleHandleA(moduleName);
+inline uintptr_t FindSig(const std::string& moduleName, const std::string& signature) {
+    HMODULE moduleHandle = GetModuleHandleA(moduleName.c_str());
     MODULEINFO moduleInfo;
     GetModuleInformation(GetCurrentProcess(), moduleHandle, &moduleInfo, sizeof(MODULEINFO));
 
     std::vector<uint16_t> pattern;
-    for (int i = 0; i < strlen(signature); i++) {
+    for (int i = 0; i < signature.size(); i++) {
         if (signature[i] == ' ')
             continue;
         if (signature[i] == '?') {
@@ -98,4 +104,26 @@ inline uintptr_t FindSig(const char* moduleName, const char* signature) {
     }
 
     return 0;
+}
+
+inline bool SigHook(const std::string& name, const std::initializer_list<std::string>& signatures, void** outOldFunc, void* newFunc, bool warnIfFailed = true) {
+    uintptr_t ptr = 0;
+    for (auto& sig : signatures) {
+        if (ptr = FindSignature(sig)) {
+            break;
+        }
+    }
+    if (!ptr) {
+        if (warnIfFailed) {
+            printf("Failed to hook %s (signature not found)\n", name.c_str());
+        }
+        return false;
+    }
+    if (HookFunction((void*)ptr, outOldFunc, newFunc) != NO_ERROR) {
+        if (warnIfFailed) {
+            printf("Failed to hook %s\n", name.c_str());
+        }
+        return false;
+    }
+    return true;
 }

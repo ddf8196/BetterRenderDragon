@@ -31,4 +31,4 @@ typedef HRESULT(STDMETHODCALLTYPE* PFN_IDXGISwapChain_ResizeBuffers)(
 	/* [in] */ DXGI_FORMAT NewFormat,
 	/* [in] */ UINT SwapChainFlags);
 
-void ImGuiHooks_Init();
+void initImGuiHooks();

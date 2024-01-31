@@ -1,3 +1,3 @@
 #pragma once
 
-void MCHooks_Init();
+void initMCHooks();

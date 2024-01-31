@@ -17,9 +17,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 			Options::init();
 			Options::load();
 
-			MCHooks_Init();
-			MCPatches_Init();
-			ImGuiHooks_Init();
+			initMCHooks();
+			initMCPatches();
+			initImGuiHooks();
 			break;
 		}
 		case DLL_THREAD_ATTACH:

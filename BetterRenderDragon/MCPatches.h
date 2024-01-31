@@ -1,6 +1,6 @@
 #pragma once
 
-void MCPatches_Init();
+void initMCPatches();
 
 class ScopedVirtualProtect {
 public:

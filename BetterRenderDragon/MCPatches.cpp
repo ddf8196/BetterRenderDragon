@@ -2,9 +2,7 @@
 #include "MCPatches.h"
 #include "Options.h"
 
-void MCPatches_Init() {
-	printf("%s\n", __FUNCTION__);
-
+void initMCPatches() {
 	if (Options::vanilla2DeferredEnabled && Options::disableRendererContextD3D12RTX) {
 		//Deferred rendering no longer requires RendererContextD3D12RTX since 1.19.80, so it can be disabled for better performance
 		//bgfx::d3d12rtx::RendererContextD3D12RTX::init

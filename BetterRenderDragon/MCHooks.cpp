@@ -160,92 +160,63 @@ DeclareHook(readFile, std::string*, void* This, std::string* retstr, Core::Path&
 
 //==========================================================================================================================
 
-void MCHooks_Init() {
-	printf("%s\n", __FUNCTION__);
-
+void initMCHooks() {
 	//RayTracingOptions::isRayTracingAvailable
-	//1.19.80
-	uintptr_t isRayTracingAvailablePtr = FindSignature("40 53 48 83 EC 20 48 8B 01 48 8B D9 48 8B 40 08 ? ? ? ? ? ? 84 C0 74 30");
-	if (isRayTracingAvailablePtr) {
-		Hook(RayTracingOptions_isRayTracingAvailable, (void*)isRayTracingAvailablePtr);
-	} else {
-		printf("Failed to hook RayTracingOptions::isRayTracingAvailable\n");
-	}
+	TrySigHook(RayTracingOptions_isRayTracingAvailable, {
+		//1.19.80
+		"40 53 48 83 EC 20 48 8B 01 48 8B D9 48 8B 40 08 ? ? ? ? ? ? 84 C0 74 30"
+	});
 
 	/*Force Enable Deferred Technical Preview*/ {
 		//std::make_unique<BoolOption>
-		//1.20.30.02
-		//1.20.30.21 preview
-		uintptr_t makeBoolOptionPtr = FindSignature("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 4D 8B E1 4D 8B E8 48 89 54 24 ? 4C 8B F1 48 89 4C 24 ? 48 8B AC 24 ? ? ? ? 48 8B B4 24 ? ? ? ? 33 FF");
-		if (!makeBoolOptionPtr) {
+		TrySigHook(makeBoolOption, {
+			//1.20.30.02
+			//1.20.30.21 preview
+			"48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 4D 8B E1 4D 8B E8 48 89 54 24 ? 4C 8B F1 48 89 4C 24 ? 48 8B AC 24 ? ? ? ? 48 8B B4 24 ? ? ? ? 33 FF",
 			//1.20.30.20 preview
-			makeBoolOptionPtr = FindSignature("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 4C 89 4D F7 4C 89 45 FF 48 89 55 07 4C 8B E1 48 89 4D 0F 4C 8B 7D 6F 4C 8B 75 77 33 FF");
-		}
-		if (!makeBoolOptionPtr) {
+			"48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 4C 89 4D F7 4C 89 45 FF 48 89 55 07 4C 8B E1 48 89 4D 0F 4C 8B 7D 6F 4C 8B 75 77 33 FF",
 			//1.20.50.20 preview
-			makeBoolOptionPtr = FindSignature("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 4D 8B E1 4D 8B E8 48 89 54 24 ? 4C 8B F1 48 89 4C 24 ? 48 8B AC 24 ? ? ? ? 48 8B B4 24 ? ? ? ? 33 DB 89 5C 24 40 E8 ? ? ? ? 48 8B C8 48 8B 00 8D 53 58");
-		}
-		if (makeBoolOptionPtr) {
-			Hook(makeBoolOption, (void*)makeBoolOptionPtr);
-		} else {
-			printf("Failed to hook std::make_unique<BoolOption>\n");
-		}
+			"48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 4D 8B E1 4D 8B E8 48 89 54 24 ? 4C 8B F1 48 89 4C 24 ? 48 8B AC 24 ? ? ? ? 48 8B B4 24 ? ? ? ? 33 DB 89 5C 24 40 E8 ? ? ? ? 48 8B C8 48 8B 00 8D 53 58"
+		});
 
 		//Option::getBool
-		//1.20.30.02
-		uintptr_t optionGetBoolPtr = FindSignature("48 8B 41 08 48 8B 90 ? ? ? ? 48 85 D2 74 18");
-		if (optionGetBoolPtr) {
-			Hook(Option_getBool, (void*)optionGetBoolPtr);
-		} else {
-			printf("Failed to hook Option::getBool\n");
-		}
+		TrySigHook(Option_getBool, {
+			//1.20.30.02
+			"48 8B 41 08 48 8B 90 ? ? ? ? 48 85 D2 74 18"
+		});
 	 
 		//BoolOption::set
-		//1.20.30.02
-		//1.20.30.21 preview
-		uintptr_t boolOptionSetPtr = FindSignature("48 89 5C 24 ? 57 48 83 EC 30 48 8B 05 ? ? ? ? 48 33 C4 48 89 44 24 ? 41 0F B6 F8 0F B6 C2 48 8B D9");
-		if (boolOptionSetPtr) {
-			Hook(BoolOption_set, (void*)boolOptionSetPtr);
-		}
+		bool boolOptionSetHooked = TrySigHookNoWarning(BoolOption_set, {
+			//1.20.30.02
+			//1.20.30.21 preview
+			"48 89 5C 24 ? 57 48 83 EC 30 48 8B 05 ? ? ? ? 48 33 C4 48 89 44 24 ? 41 0F B6 F8 0F B6 C2 48 8B D9"
+		});
 
 		//Option::set<bool>
-		//1.20.30.20 preview
-		uintptr_t optionsSetBoolPtr = FindSignature("48 89 5C 24 ? 57 48 83 EC 40 48 8B 41 08 48 8B FA 48 8B D9 83 B8 ? ? ? ? ? 74 3C 48 8D 05 ? ? ? ? 41 B9 ? ? ? ?");
-		if (optionsSetBoolPtr) {
-			Hook(Option_set_bool, (void*)optionsSetBoolPtr);
-		}
+		bool optionsSetBoolHooked = TrySigHookNoWarning(Option_set_bool, {
+			//1.20.30.20 preview
+			"48 89 5C 24 ? 57 48 83 EC 40 48 8B 41 08 48 8B FA 48 8B D9 83 B8 ? ? ? ? ? 74 3C 48 8D 05 ? ? ? ? 41 B9 ? ? ? ?"
+		});
 
-		if (!boolOptionSetPtr && !optionsSetBoolPtr) {
+		if (!boolOptionSetHooked && !optionsSetBoolHooked) {
 			printf("Failed to hook BoolOption::set or Option::set<bool>\n");
 		}
 
-		//1.20.30.02
-		uintptr_t isLightingModelSupportedPtr = FindSignature("40 53 48 83 EC 20 41 0F B6 D8 83 FA 02 75 13 48 8B 01 48 8B 40 38 48 83 C4 20 5B 48 FF 25 ? ? ? ?");
-		if (isLightingModelSupportedPtr) {
-			Hook(isLightingModelSupported, (void*)isLightingModelSupportedPtr);
-		} else {
-			printf("Failed to hook isLightingModelSupported\n");
-		}
+		TrySigHook(isLightingModelSupported, {
+			//1.20.30.02
+			"40 53 48 83 EC 20 41 0F B6 D8 83 FA 02 75 13 48 8B 01 48 8B 40 38 48 83 C4 20 5B 48 FF 25 ? ? ? ?"
+		});
 
-		//1.20.30.02
-		uintptr_t callbackPtr = FindSignature("48 89 5C 24 ? 57 48 83 EC 40 48 8B D9 C7 44 24 ? ? ? ? ? 48 8B 01 48 8B 88 ? ? ? ? 48 85 C9");
-		if (!callbackPtr) {
+		TrySigHook(graphicsModeRadioDeferredEnabledCallback, {
+			//1.20.30.02
+			"48 89 5C 24 ? 57 48 83 EC 40 48 8B D9 C7 44 24 ? ? ? ? ? 48 8B 01 48 8B 88 ? ? ? ? 48 85 C9",
 			//1.20.30.20 preview
-			callbackPtr = FindSignature("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC 60 C7 44 24 ? ? ? ? ?");
-		}
-		if (!callbackPtr) {
+			"48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC 60 C7 44 24 ? ? ? ? ?",
 			//1.20.30.21 preview
-			callbackPtr = FindSignature("48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 54 41 56 41 57 48 83 EC 60 C7 44 24 ? ? ? ? ?");
-		}
-		if (!callbackPtr) {
+			"48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 54 41 56 41 57 48 83 EC 60 C7 44 24 ? ? ? ? ?",
 			//1.20.50.20 preview
-			callbackPtr = FindSignature("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC 60 C7 44 24 ? ? ? ? ?");
-		}
-		if (callbackPtr) {
-			Hook(graphicsModeRadioDeferredEnabledCallback, (void*)callbackPtr);
-		} else {
-			printf("Failed to hook graphicsModeRadioDeferredEnabledCallback\n");
-		}
+			"48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC 60 C7 44 24 ? ? ? ? ?"
+		});
 	}
 
 	////dragon::materials::MaterialUniformMap::setUniform<glm::vec4>
@@ -265,44 +236,25 @@ void MCHooks_Init() {
 	//}
 
 	//ResourcePackManager::ResourcePackManager
-	//1.19.80
-	uintptr_t resourcePackManagerPtr = FindSignature("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 41 0F B6 F1 49 8B D8 4C 8B F2 48 8B F9");
-	if (!resourcePackManagerPtr) {
+	TrySigHook(ResourcePackManager_constructor, {
+		//1.19.80
+		"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 41 0F B6 F1 49 8B D8 4C 8B F2 48 8B F9",
 		//1.20.1.02
-		resourcePackManagerPtr = FindSignature("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 41 0F B6 F1 49 8B F8 4C 8B F2 48 8B D9");
-	}
-	if (!resourcePackManagerPtr) {
+		"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 41 0F B6 F1 49 8B F8 4C 8B F2 48 8B D9",
 		//1.20.10.23 preview
-		resourcePackManagerPtr = FindSignature("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 45 0F B6 F1 49 8B F8 48 8B F2 48 8B D9");
-	}
-	if (!resourcePackManagerPtr) {
+		"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 45 0F B6 F1 49 8B F8 48 8B F2 48 8B D9",
 		//1.20.30.21 preview
-		resourcePackManagerPtr = FindSignature("4C 8B DC 53 55 56 57 41 56 48 81 EC ? ? ? ? 41 0F B6 E9 49 8B D8 48 8B F2 48 8B F9");
-	}
-	if (resourcePackManagerPtr) {
-		Hook(ResourcePackManager_constructor, (void*)resourcePackManagerPtr);
-	} else {
-		printf("Failed to hook ResourcePackManager::ResourcePackManager\n");
-	}
+		"4C 8B DC 53 55 56 57 41 56 48 81 EC ? ? ? ? 41 0F B6 E9 49 8B D8 48 8B F2 48 8B F9"
+	});
 
-	//1.19.40
-	uintptr_t readFilePtr = FindSignature("48 89 5C 24 ? 55 56 57 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 70 49 8B C0");
-	if (!readFilePtr) {
+	TrySigHook(readFile, {
+		//1.19.40
+		"48 89 5C 24 ? 55 56 57 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 70 49 8B C0",
 		//1.20.0.23 preview
-		readFilePtr = FindSignature("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 20 49 8B C0");
-	}
-	if (!readFilePtr) {
+		"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 20 49 8B C0",
 		//1.20.30.21 preview
-		readFilePtr = FindSignature("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 49 8B C0 48 8B FA");
-	}
-	if (!readFilePtr) {
+		"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 49 8B C0 48 8B FA",
 		//1.20.30.02
-		readFilePtr = FindSignature("48 89 5C 24 ? 55 56 57 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 49 8B C0");
-	}
-
-	if (readFilePtr) {
-		Hook(readFile, (void*)readFilePtr);
-	} else {
-		printf("Failed to hook readFile\n");
-	}
+		"48 89 5C 24 ? 55 56 57 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 49 8B C0"
+	});
 }

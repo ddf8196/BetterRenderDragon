@@ -636,9 +636,7 @@ DeclareHook(CreateDXGIFactory1, HRESULT, REFIID riid, void** ppFactory) {
 
 //=======================================================================================================================================================================
 
-void ImGuiHooks_Init() {
-	printf("%s\n", __FUNCTION__);
-
+void initImGuiHooks() {
 	HMODULE dxgiModule = GetModuleHandleA("dxgi.dll");
 	if (!dxgiModule) {
 		return;
