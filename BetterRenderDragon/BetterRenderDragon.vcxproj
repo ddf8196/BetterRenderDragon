@@ -97,6 +97,7 @@
     <ClCompile Include="..\include\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\include\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\include\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="GUI.cpp" />
     <ClCompile Include="ImGuiHooks.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="imgui_impl_winrt.cpp" />
@@ -106,6 +107,7 @@
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GUI.h" />
     <ClInclude Include="ImGuiHooks.h" />
     <ClInclude Include="HookAPI.h" />
     <ClInclude Include="imgui_impl_winrt.h" />

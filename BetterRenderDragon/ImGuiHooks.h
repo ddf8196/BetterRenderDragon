@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <dxgi1_6.h>
 
 //=========================================================================================================================//
@@ -32,3 +33,5 @@ typedef HRESULT(STDMETHODCALLTYPE* PFN_IDXGISwapChain_ResizeBuffers)(
 	/* [in] */ UINT SwapChainFlags);
 
 void initImGuiHooks();
+std::string getGPUName();
+std::string getRendererType();
