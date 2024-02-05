@@ -64,13 +64,20 @@ inline void ReplaceVtable(void* _vptr, size_t index, void** outOldFunc, void* ne
 
 inline uintptr_t FindSig(const std::string& moduleName, const std::string& signature) {
     HMODULE moduleHandle = GetModuleHandleA(moduleName.c_str());
-    MODULEINFO moduleInfo;
-    GetModuleInformation(GetCurrentProcess(), moduleHandle, &moduleInfo, sizeof(MODULEINFO));
+    if (!moduleHandle) {
+        return 0;
+    }
+
+    MODULEINFO moduleInfo{};
+    if (!GetModuleInformation(GetCurrentProcess(), moduleHandle, &moduleInfo, sizeof(MODULEINFO))) {
+        return 0;
+    }
 
     std::vector<uint16_t> pattern;
     for (int i = 0; i < signature.size(); i++) {
-        if (signature[i] == ' ')
+        if (signature[i] == ' ') {
             continue;
+        }
         if (signature[i] == '?') {
             pattern.push_back(0xFF00);
             i++;
@@ -80,18 +87,19 @@ inline uintptr_t FindSig(const std::string& moduleName, const std::string& signa
         }
     }
 
-    if (pattern.size() == 0)
+    if (pattern.size() == 0) {
         return (uintptr_t)moduleHandle;
+    }
 
     int patternIdx = 0;
     uintptr_t match = 0;
     for (uintptr_t i = (uintptr_t)moduleHandle; i < (uintptr_t)moduleHandle + moduleInfo.SizeOfImage; i++) {
         uint8_t current = *(uint8_t*)i;
         if (current == pattern[patternIdx] || pattern[patternIdx] & 0xFF00) {
-            if (!match)
+            if (!match) {
                 match = i;
-            patternIdx++;
-            if (patternIdx == pattern.size()) {
+            }
+            if (++patternIdx == pattern.size()) {
                 return match;
             }
         } else {

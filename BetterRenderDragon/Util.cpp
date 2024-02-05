@@ -1,16 +1,14 @@
 #include "Util.h"
-#include <locale.h>
+#include <windows.h>
 #include <intrin.h>
 
-std::string wstringToString(const std::wstring& str) {
-	unsigned len = str.size() * 4;
-	setlocale(LC_CTYPE, "");
-	char* p = new char[len];
-	size_t numCharConv;
-	wcstombs_s(&numCharConv, p, len, str.c_str(), len);
-	std::string str1(p);
-	delete[] p;
-	return str1;
+std::string wstringToString(const std::wstring& wstr) {
+	int len = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), (int)wstr.size(), nullptr, 0, nullptr, nullptr);
+	char* buffer = new char[len] {};
+	WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), (int)wstr.size(), buffer, len, nullptr, nullptr);
+	std::string result(buffer, len);
+	delete[] buffer;
+	return result;
 }
 
 std::string getCPUName() {
@@ -22,7 +20,7 @@ std::string getCPUName() {
 	memset(CPUBrandString, 0, sizeof(CPUBrandString));
 
 	// Get the information associated with each extended ID.
-	for (int i = 0x80000000; i <= nExIds; ++i) {
+	for (unsigned int i = 0x80000000; i <= nExIds; ++i) {
 		__cpuid(CPUInfo, i);
 		// Interpret CPU brand string.
 		if (i == 0x80000002)

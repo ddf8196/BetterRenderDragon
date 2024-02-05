@@ -24,15 +24,15 @@ private:
 
 	float dpi;
 
-    void UpdateMouseButtonState(ABI::Windows::UI::Core::IPointerEventArgs* args);
-	HRESULT OnPointerMoved(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IPointerEventArgs* args);
-	HRESULT OnPointerExited(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IPointerEventArgs* args);
-	HRESULT OnPointerPressed(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IPointerEventArgs* args);
-	HRESULT OnPointerReleased(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IPointerEventArgs* args);
-	HRESULT OnPointerWheelChanged(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IPointerEventArgs* args);
-	HRESULT OnKeyDown(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IKeyEventArgs* args);
-	HRESULT OnKeyUp(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IKeyEventArgs* args);
-	HRESULT OnCharacterReceived(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::ICharacterReceivedEventArgs* args);
-	HRESULT OnDpiChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args);
+    void updateMouseButtonState(ABI::Windows::UI::Core::IPointerEventArgs* args);
+	HRESULT onPointerMoved(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IPointerEventArgs* args);
+	HRESULT onPointerExited(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IPointerEventArgs* args);
+	HRESULT onPointerPressed(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IPointerEventArgs* args);
+	HRESULT onPointerReleased(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IPointerEventArgs* args);
+	HRESULT onPointerWheelChanged(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IPointerEventArgs* args);
+	HRESULT onKeyDown(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IKeyEventArgs* args);
+	HRESULT onKeyUp(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::IKeyEventArgs* args);
+	HRESULT onCharacterReceived(ABI::Windows::UI::Core::ICoreWindow* sender, ABI::Windows::UI::Core::ICharacterReceivedEventArgs* args);
+	HRESULT onDpiChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args);
 };
 

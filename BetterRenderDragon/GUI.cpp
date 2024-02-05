@@ -31,47 +31,44 @@ void updateImGui() {
 	ImGui::NewFrame();
 	if (Options::showImGui) {
 		auto& io = ImGui::GetIO();
-
+		
 		ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(340, 275), ImGuiCond_FirstUseEver);
-		ImGuiWindowFlags mainWindowFlags = ImGuiWindowFlags_MenuBar;
-
-		if (ImGui::Begin("BetterRenderDragon", &Options::showImGui, mainWindowFlags)) {
+		if (ImGui::Begin("BetterRenderDragon", &Options::showImGui, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize)) {
 			if (ImGui::BeginMenuBar()) {
 				if (ImGui::BeginMenu("View")) {
-					if (ImGui::MenuItem("Open Module Manager", NULL)) {
+					if (ImGui::MenuItem("Open Module Manager")) {
 						showModuleManager = true;
 						moduleManagerRequestFocus = true;
 					}
-					//if (ImGui::MenuItem("Open ImGui Demo Window", NULL)) {
+					//if (ImGui::MenuItem("Open ImGui Demo Window")) {
 					//	showDemo = true;
 					//}
 					ImGui::EndMenu();
 				}
 				if (ImGui::BeginMenu("Windows")) {
-					if (ImGui::MenuItem("Reset window position and size", NULL))
+					if (ImGui::MenuItem("Reset window position and size"))
 						resetLayout = true;
 					if (showModuleManager || showAbout/* || showDemo*/)
 						ImGui::Separator();
-					if (showModuleManager && ImGui::MenuItem("Module Manager", NULL))
+					if (showModuleManager && ImGui::MenuItem("Module Manager"))
 						moduleManagerRequestFocus = true;
-					if (showAbout && ImGui::MenuItem("About", NULL))
+					if (showAbout && ImGui::MenuItem("About"))
 						aboutRequestFocus = true;
-					if (showChangelog && ImGui::MenuItem("Changelog", NULL))
+					if (showChangelog && ImGui::MenuItem("Changelog"))
 						changelogRequestFocus = true;
 					//if (showDemo)
-					//	ImGui::MenuItem("ImGui Demo Window", NULL);
+					//	ImGui::MenuItem("ImGui Demo Window");
 					ImGui::EndMenu();
 				}
 				if (ImGui::BeginMenu("Help")) {
-					if (ImGui::MenuItem("About", NULL)) {
+					if (ImGui::MenuItem("About")) {
 						showAbout = true;
 						aboutRequestFocus = true;
 					}
 					ImGui::EndMenu();
 				}
 				if (ImGui::BeginMenu("Changelog")) {
-					if (ImGui::MenuItem("Changelog", NULL)) {
+					if (ImGui::MenuItem("Changelog")) {
 						showChangelog = true;
 						changelogRequestFocus = true;
 					}
@@ -152,7 +149,6 @@ void updateImGui() {
 		if (showModuleManager) {
 			if (moduleManagerRequestFocus)
 				ImGui::SetNextWindowFocus();
-			ImGui::SetNextWindowSize(ImVec2(300, 130), ImGuiCond_FirstUseEver);
 			if (ImGui::Begin("BetterRenderDragon - Module Manager", &showModuleManager)) {
 				if (ImGui::BeginTable("modulesTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
 					ImGui::TableSetupColumn("Module");
@@ -217,6 +213,7 @@ void updateImGui() {
 
 	if (resetLayout) {
 		ImGui::ClearWindowSettings("BetterRenderDragon");
+		ImGui::ClearWindowSettings("BetterRenderDragon - Module Manager");
 		ImGui::ClearWindowSettings("Dear ImGui Demo");
 	}
 }

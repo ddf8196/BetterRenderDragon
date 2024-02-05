@@ -140,11 +140,10 @@ DeclareHook(ResourcePackManager_constructor, void*, void* This, uintptr_t a2, ui
 DeclareHook(readFile, std::string*, void* This, std::string* retstr, Core::Path& path) {
 	std::string* result = original(This, retstr, path);
 	if (Options::materialBinLoaderEnabled && Options::redirectShaders && resourcePackManager) {
-		std::string& p = path.mPathPart.mUtf8StdString;
+		const std::string& p = path.getUtf8StdString();
 		if (p.find("/data/renderer/materials/") != std::string::npos && strncmp(p.c_str() + p.size() - 13, ".material.bin", 13) == 0) {
 			std::string binPath = "renderer/materials/" + p.substr(p.find_last_of('/') + 1);
-			Core::Path path1(binPath);
-			ResourceLocation location(path1);
+			ResourceLocation location(binPath);
 			std::string out;
 			//printf("ResourcePackManager::load path=%s\n", binPath.c_str());
 

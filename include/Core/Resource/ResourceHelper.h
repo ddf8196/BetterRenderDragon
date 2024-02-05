@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <functional>
 #include "../File/Path.h"
 
 enum class ResourceFileSystem {
@@ -19,45 +20,33 @@ enum class ResourceFileSystem {
 
 class ResourceLocation {
 public:
-	ResourceFileSystem mFileSystem; //this+0x0
-	Core::PathBuffer<std::string> mPath; //this+0x8
-	uint64_t mPathHash; //this+0x28
-	uint64_t mFullHash; //this+0x30
-
-	ResourceLocation(Core::Path& path) : mPath(path.mPathPart.mUtf8StdString.c_str()) {
+	ResourceLocation(const Core::Path& path) : mPath(path){
 		mFileSystem = ResourceFileSystem::UserPackage;
 		_computeHashes();
 	}
 
-	ResourceLocation(Core::Path&& path) : mPath(path.mPathPart.mUtf8StdString.c_str()) {
-		mFileSystem = ResourceFileSystem::UserPackage;
+	ResourceLocation(const Core::Path& path, ResourceFileSystem fileSystem) : mPath(path) {
+		mFileSystem = fileSystem;
 		_computeHashes();
 	}
 
 private:
-	void _computeHashes() {
-		const char* mPath; // rdx
-		uint8_t v3; // cl
-		uint8_t v4; // rax
-		uint8_t v5; // rcx
+	ResourceFileSystem mFileSystem; //this+0x0
+	Core::HeapPathBuffer mPath; //this+0x8
+	uint64_t mPathHash; //this+0x28
+	size_t mFullHash; //this+0x30
 
-		mPath = this->mPath.mContainer.c_str();
-		if (mPath && (v3 = *mPath) != 0)
-		{
-			v4 = 0xCBF29CE484222325ui64;
-			do
-			{
-				mPath = mPath + 1;
-				v4 = v3 ^ (0x100000001B3i64 * v4);
-				v3 = *(uint8_t*)mPath;
-			} while (*(uint8_t*)mPath);
+	void _computeHashes() {
+		uint64_t pathHash;
+		if (!mPath.empty()) {
+			pathHash = 0xCBF29CE484222325LL;
+			for (auto c : this->mPath.getContainer()) {
+				pathHash = c ^ (0x100000001B3LL * pathHash);
+			}
+		} else {
+			pathHash = 0;
 		}
-		else
-		{
-			v4 = 0i64;
-		}
-		v5 = (uint8_t)this->mFileSystem ^ 0xCBF29CE484222325ui64;
-		this->mPathHash = v4;
-		this->mFullHash = v4 ^ (0x100000001B3i64 * v5);
+		this->mPathHash = pathHash;
+		this->mFullHash = pathHash ^ std::hash<ResourceFileSystem>{}(this->mFileSystem);
 	}
 };

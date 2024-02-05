@@ -85,7 +85,7 @@ namespace ImGuiD3D12 {
 					return false;
 				}
 
-				if (device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, backBufferContext[i].commandAllocator, NULL, IID_PPV_ARGS(&backBufferContext[i].commandList)) != S_OK ||
+				if (device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, backBufferContext[i].commandAllocator, nullptr, IID_PPV_ARGS(&backBufferContext[i].commandList)) != S_OK ||
 					backBufferContext[i].commandList->Close() != S_OK) {
 					return false;
 				}

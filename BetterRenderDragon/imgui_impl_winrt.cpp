@@ -230,14 +230,14 @@ ImGuiInputEventHandler::ImGuiInputEventHandler(ICoreWindow* window) : window(win
 	typedef ABI::Windows::Foundation::ITypedEventHandler<ABI::Windows::UI::Core::CoreWindow*, ABI::Windows::UI::Core::KeyEventArgs*> KeyEventHandler;
 	typedef ABI::Windows::Foundation::ITypedEventHandler<ABI::Windows::UI::Core::CoreWindow*, ABI::Windows::UI::Core::CharacterReceivedEventArgs*> CharacterReceivedEventHandler;
 
-	WARN_IF_FAILED(this->window->add_PointerMoved(Callback<PointerEventHandler>(this, &ImGuiInputEventHandler::OnPointerMoved).Get(), &pointerMovedToken));
-	WARN_IF_FAILED(this->window->add_PointerExited(Callback<PointerEventHandler>(this, &ImGuiInputEventHandler::OnPointerExited).Get(), &pointerExitedToken));
-	WARN_IF_FAILED(this->window->add_PointerPressed(Callback<PointerEventHandler>(this, &ImGuiInputEventHandler::OnPointerPressed).Get(), &pointerPressedToken));
-	WARN_IF_FAILED(this->window->add_PointerReleased(Callback<PointerEventHandler>(this, &ImGuiInputEventHandler::OnPointerReleased).Get(), &pointerReleasedToken));
-	WARN_IF_FAILED(this->window->add_PointerWheelChanged(Callback<PointerEventHandler>(this, &ImGuiInputEventHandler::OnPointerWheelChanged).Get(), &pointerWheelChangedToken));
-	WARN_IF_FAILED(this->window->add_KeyDown(Callback<KeyEventHandler>(this, &ImGuiInputEventHandler::OnKeyDown).Get(), &keyDownToken));
-	WARN_IF_FAILED(this->window->add_KeyUp(Callback<KeyEventHandler>(this, &ImGuiInputEventHandler::OnKeyUp).Get(), &keyUpToken));
-	WARN_IF_FAILED(this->window->add_CharacterReceived(Callback<CharacterReceivedEventHandler>(this, &ImGuiInputEventHandler::OnCharacterReceived).Get(), &characterReceivedToken));
+	WARN_IF_FAILED(this->window->add_PointerMoved(Callback<PointerEventHandler>(this, &ImGuiInputEventHandler::onPointerMoved).Get(), &pointerMovedToken));
+	WARN_IF_FAILED(this->window->add_PointerExited(Callback<PointerEventHandler>(this, &ImGuiInputEventHandler::onPointerExited).Get(), &pointerExitedToken));
+	WARN_IF_FAILED(this->window->add_PointerPressed(Callback<PointerEventHandler>(this, &ImGuiInputEventHandler::onPointerPressed).Get(), &pointerPressedToken));
+	WARN_IF_FAILED(this->window->add_PointerReleased(Callback<PointerEventHandler>(this, &ImGuiInputEventHandler::onPointerReleased).Get(), &pointerReleasedToken));
+	WARN_IF_FAILED(this->window->add_PointerWheelChanged(Callback<PointerEventHandler>(this, &ImGuiInputEventHandler::onPointerWheelChanged).Get(), &pointerWheelChangedToken));
+	WARN_IF_FAILED(this->window->add_KeyDown(Callback<KeyEventHandler>(this, &ImGuiInputEventHandler::onKeyDown).Get(), &keyDownToken));
+	WARN_IF_FAILED(this->window->add_KeyUp(Callback<KeyEventHandler>(this, &ImGuiInputEventHandler::onKeyUp).Get(), &keyUpToken));
+	WARN_IF_FAILED(this->window->add_CharacterReceived(Callback<CharacterReceivedEventHandler>(this, &ImGuiInputEventHandler::onCharacterReceived).Get(), &characterReceivedToken));
 
 	dpi = 96;
 	ComPtr<ABI::Windows::Graphics::Display::IDisplayInformationStatics> displayInfoStatics;
@@ -253,7 +253,7 @@ ImGuiInputEventHandler::ImGuiInputEventHandler(ICoreWindow* window) : window(win
 		printf("Failed to get DPI\n");
 	}
 	printf("DPI=%f\n", dpi);
-	displayInfo->add_DpiChanged(Callback<__FITypedEventHandler_2_Windows__CGraphics__CDisplay__CDisplayInformation_IInspectable>(this, &ImGuiInputEventHandler::OnDpiChanged).Get(), &dpiChangedToken);
+	displayInfo->add_DpiChanged(Callback<__FITypedEventHandler_2_Windows__CGraphics__CDisplay__CDisplayInformation_IInspectable>(this, &ImGuiInputEventHandler::onDpiChanged).Get(), &dpiChangedToken);
 }
 
 ImGuiInputEventHandler::~ImGuiInputEventHandler() {
@@ -271,7 +271,7 @@ ImGuiInputEventHandler::~ImGuiInputEventHandler() {
 	}
 }
 
-void ImGuiInputEventHandler::UpdateMouseButtonState(IPointerEventArgs* args) {
+void ImGuiInputEventHandler::updateMouseButtonState(IPointerEventArgs* args) {
 	auto& io = ImGui::GetIO();
 	ComPtr<ABI::Windows::UI::Input::IPointerPoint> currentPoint;
 	args->get_CurrentPoint(&currentPoint);
@@ -310,7 +310,7 @@ void ImGuiInputEventHandler::UpdateMouseButtonState(IPointerEventArgs* args) {
 	}
 }
 
-HRESULT ImGuiInputEventHandler::OnPointerMoved(ICoreWindow* sender, IPointerEventArgs* args) {
+HRESULT ImGuiInputEventHandler::onPointerMoved(ICoreWindow* sender, IPointerEventArgs* args) {
 	auto& io = ImGui::GetIO();
 	ComPtr<ABI::Windows::UI::Input::IPointerPoint> currentPoint;
 	args->get_CurrentPoint(&currentPoint);
@@ -323,23 +323,23 @@ HRESULT ImGuiInputEventHandler::OnPointerMoved(ICoreWindow* sender, IPointerEven
 	return S_OK;
 }
 
-HRESULT ImGuiInputEventHandler::OnPointerExited(ICoreWindow* sender, IPointerEventArgs* args) {
+HRESULT ImGuiInputEventHandler::onPointerExited(ICoreWindow* sender, IPointerEventArgs* args) {
 	auto& io = ImGui::GetIO();
 	io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
 	return S_OK;
 }
 
-HRESULT ImGuiInputEventHandler::OnPointerPressed(ICoreWindow* sender, IPointerEventArgs* args) {
-	UpdateMouseButtonState(args);
+HRESULT ImGuiInputEventHandler::onPointerPressed(ICoreWindow* sender, IPointerEventArgs* args) {
+	updateMouseButtonState(args);
 	return S_OK;
 }
 
-HRESULT ImGuiInputEventHandler::OnPointerReleased(ICoreWindow* sender, IPointerEventArgs* args) {
-	UpdateMouseButtonState(args);
+HRESULT ImGuiInputEventHandler::onPointerReleased(ICoreWindow* sender, IPointerEventArgs* args) {
+	updateMouseButtonState(args);
 	return S_OK;
 }
 
-HRESULT ImGuiInputEventHandler::OnPointerWheelChanged(ICoreWindow* sender, IPointerEventArgs* args) {
+HRESULT ImGuiInputEventHandler::onPointerWheelChanged(ICoreWindow* sender, IPointerEventArgs* args) {
 	auto& io = ImGui::GetIO();
 
 	ComPtr<ABI::Windows::UI::Input::IPointerPoint> currentPoint;
@@ -356,7 +356,7 @@ HRESULT ImGuiInputEventHandler::OnPointerWheelChanged(ICoreWindow* sender, IPoin
 	return S_OK;
 }
 
-HRESULT ImGuiInputEventHandler::OnKeyDown(ICoreWindow* sender, IKeyEventArgs* args) {
+HRESULT ImGuiInputEventHandler::onKeyDown(ICoreWindow* sender, IKeyEventArgs* args) {
 	auto& io = ImGui::GetIO();
 
 	ABI::Windows::System::VirtualKey vk;
@@ -367,7 +367,7 @@ HRESULT ImGuiInputEventHandler::OnKeyDown(ICoreWindow* sender, IKeyEventArgs* ar
 	return S_OK;
 }
 
-HRESULT ImGuiInputEventHandler::OnKeyUp(ICoreWindow* sender, IKeyEventArgs* args) {
+HRESULT ImGuiInputEventHandler::onKeyUp(ICoreWindow* sender, IKeyEventArgs* args) {
 	auto& io = ImGui::GetIO();
 
 	ABI::Windows::System::VirtualKey vk;
@@ -378,7 +378,7 @@ HRESULT ImGuiInputEventHandler::OnKeyUp(ICoreWindow* sender, IKeyEventArgs* args
 	return S_OK;
 }
 
-HRESULT ImGuiInputEventHandler::OnCharacterReceived(ICoreWindow* sender, ICharacterReceivedEventArgs* args) {
+HRESULT ImGuiInputEventHandler::onCharacterReceived(ICoreWindow* sender, ICharacterReceivedEventArgs* args) {
 	auto& io = ImGui::GetIO();
 
 	UINT32 c;
@@ -389,7 +389,7 @@ HRESULT ImGuiInputEventHandler::OnCharacterReceived(ICoreWindow* sender, ICharac
 	return S_OK;
 }
 
-HRESULT ImGuiInputEventHandler::OnDpiChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args) {
+HRESULT ImGuiInputEventHandler::onDpiChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args) {
 	printf("DPI changed\n");
 	if (FAILED(sender->get_LogicalDpi(&dpi))) {
 		printf("Failed to get DPI\n");
