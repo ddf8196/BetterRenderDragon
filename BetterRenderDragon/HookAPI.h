@@ -11,6 +11,7 @@
 #include <detours/detours.h>
 
 #define FindSignature(signature) FindSig("Minecraft.Windows.exe", signature)
+#define FindSignatures(...) FindSigs("Minecraft.Windows.exe", {__VA_ARGS__})
 
 #define DeclareHook(name, ret, ...) \
 struct _Hook_##name { \
@@ -26,8 +27,8 @@ ret _Hook_##name::_hook(__VA_ARGS__)
 #define IsHooked(name) (_Hook_##name::_original != nullptr)
 #define Hook(name, ptr) HookFunction(ptr, (void**)&_Hook_##name::_original, &_Hook_##name::_hook)
 #define Unhook(name) UnhookFunction(_Hook_##name::_original, &_Hook_##name::_hook)
-#define TrySigHook(name, ...) SigHook(#name, __VA_ARGS__, (void**)&_Hook_##name::_original, &_Hook_##name::_hook)
-#define TrySigHookNoWarning(name, ...) SigHook(#name, __VA_ARGS__, (void**)&_Hook_##name::_original, &_Hook_##name::_hook, false)
+#define TrySigHook(name, ...) SigHook(#name, "Minecraft.Windows.exe", {__VA_ARGS__}, (void**)&_Hook_##name::_original, &_Hook_##name::_hook)
+#define TrySigHookNoWarning(name, ...) SigHook(#name, "Minecraft.Windows.exe", {__VA_ARGS__}, (void**)&_Hook_##name::_original, &_Hook_##name::_hook, false)
 
 inline int HookFunction(void* oldFunc, void** outOldFunc, void* newFunc) {
     DetourTransactionBegin();
@@ -114,13 +115,18 @@ inline uintptr_t FindSig(const std::string& moduleName, const std::string& signa
     return 0;
 }
 
-inline bool SigHook(const std::string& name, const std::initializer_list<std::string>& signatures, void** outOldFunc, void* newFunc, bool warnIfFailed = true) {
+inline uintptr_t FindSigs(const std::string& moduleName, const std::initializer_list<std::string>& signatures) {
     uintptr_t ptr = 0;
     for (auto& sig : signatures) {
-        if (ptr = FindSignature(sig)) {
+        if (ptr = FindSig(moduleName, sig)) {
             break;
         }
     }
+    return ptr;
+}
+
+inline bool SigHook(const std::string& name, const std::string& moduleName, const std::initializer_list<std::string>& signatures, void** outOldFunc, void* newFunc, bool warnIfFailed = true) {
+    uintptr_t ptr = FindSigs(moduleName, signatures);
     if (!ptr) {
         if (warnIfFailed) {
             printf("Failed to hook %s (signature not found)\n", name.c_str());
