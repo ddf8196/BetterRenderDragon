@@ -1,6 +1,5 @@
 ﻿#include <windows.h>
 #include <wrl.h>
-#pragma comment(lib, "runtimeobject.lib")
 
 #include "ImGuiHooks.h"
 #include "MCHooks.h"
@@ -10,8 +9,8 @@
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
     switch (ul_reason_for_call) {
 		case DLL_PROCESS_ATTACH: {
-			if (FAILED(RoInitialize(RO_INIT_MULTITHREADED))) {
-				printf("RoInitialize failed\n");
+			if (FAILED(Windows::Foundation::Initialize(RO_INIT_MULTITHREADED))) {
+				printf("Windows::Foundation::Initialize failed\n");
 				return TRUE;
 			}
 			Options::init();
@@ -29,7 +28,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 			break;
 		case DLL_PROCESS_DETACH:
 			Options::save();
-			RoUninitialize();
+			Windows::Foundation::Uninitialize();
 			break;
     }
     return TRUE;
