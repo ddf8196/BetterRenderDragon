@@ -19,9 +19,13 @@ public:
 
 	static bool materialBinLoaderEnabled;
 	static bool redirectShaders;
+	static bool reloadShadersAvailable;
+	static std::atomic_bool reloadShaders;
 
 	static bool customUniformsEnabled;
-	static int uikey;
+
+	static int uiKey;
+	static int reloadShadersKey;
 
 	static std::atomic_bool dirty;
 

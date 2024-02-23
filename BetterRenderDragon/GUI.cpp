@@ -113,6 +113,16 @@ void updateImGui() {
 			if (Options::materialBinLoaderEnabled && ImGui::CollapsingHeader("MaterialBinLoader", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Indent();
 				ImGui::Checkbox("Load shaders from resource pack", &Options::redirectShaders);
+				if (Options::reloadShadersAvailable) {
+					bool disable = Options::reloadShaders;
+					if (disable)
+						ImGui::BeginDisabled();
+					if (ImGui::Button("Reload shaders")) {
+						Options::reloadShaders = true;
+					}
+					if (disable)
+						ImGui::EndDisabled();
+				}
 				ImGui::Unindent();
 			}
 
@@ -288,17 +298,15 @@ void updateOptions() {
 
 void updateKeys() {
 	static bool prevToggleImGui = false;
-	static bool prevToggleDeferredRendering = false;
 
-	bool toggleImGui = ImGui::IsKeyPressed((ImGuiKey)Options::uikey) && !justChangedKey;
+	bool toggleImGui = ImGui::IsKeyPressed((ImGuiKey)Options::uiKey) && !justChangedKey;
 	if (!toggleImGui)
 		justChangedKey = false;
 	if (toggleImGui && !prevToggleImGui)
 		Options::showImGui = !Options::showImGui;
 	prevToggleImGui = toggleImGui;
 
-	bool toggleDR = ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyDown(ImGuiKey_Semicolon);
-	if (toggleDR && !prevToggleDeferredRendering)
-		Options::deferredRenderingEnabled = !Options::deferredRenderingEnabled;
-	prevToggleDeferredRendering = toggleDR;
+	if (Options::reloadShadersAvailable && !Options::reloadShaders && ImGui::IsKeyPressed((ImGuiKey)Options::reloadShadersKey)) {
+		Options::reloadShaders = true;
+	}
 }

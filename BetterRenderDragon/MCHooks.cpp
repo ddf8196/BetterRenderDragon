@@ -1,11 +1,10 @@
-#include <unordered_set>
-
 #include "HookAPI.h"
 #include "MCHooks.h"
 #include "Options.h"
 
 #include "Renderdragon/Materials/ShaderCodePlatform.h"
 #include "Renderdragon/Materials/MaterialUniformName.h"
+#include "RenderDragon/Materials/MaterialResourceManager.h"
 #include "Renderdragon/Rendering/LightingModels.h"
 #include "Core/Resource/ResourceHelper.h"
 #include "Core/Math/Vec4.h"
@@ -157,6 +156,37 @@ DeclareHook(readFile, std::string*, void* This, std::string* retstr, Core::Path&
 	return result;
 }
 
+using dragon::materials::MaterialResourceManager;
+
+typedef void (*PFN_mce_framebuilder_BgfxFrameBuilder_discardFrame)(uintptr_t This, bool waitForPreviousFrame);
+typedef void (*PFN_dragon_materials_CompiledMaterialManager_freeShaderBlobs)(uintptr_t This);
+
+PFN_mce_framebuilder_BgfxFrameBuilder_discardFrame discardFrame = nullptr;
+PFN_dragon_materials_CompiledMaterialManager_freeShaderBlobs freeShaderBlobs = nullptr;
+
+int offsetToMaterialsManager = -1;
+
+DeclareHook(mce_framebuilder_BgfxFrameBuilder_endFrame, void, uintptr_t This, uintptr_t frameBuilderContext) {
+	if (Options::reloadShadersAvailable && Options::reloadShaders) {
+		Options::reloadShaders = false;
+
+		uintptr_t compiledMaterialManager = *(uintptr_t*)(*(uintptr_t*)(This + 40) + 16) + 768;
+		uintptr_t mExtractor = *(uintptr_t*)(This + 32);
+		MaterialResourceManager* mMaterialsManager = *(MaterialResourceManager**)(mExtractor + offsetToMaterialsManager);
+
+		if (discardFrame && freeShaderBlobs && mMaterialsManager) {
+			discardFrame(This, true);
+
+			mMaterialsManager->forceTrim();
+			freeShaderBlobs(compiledMaterialManager);
+			freeShaderBlobs(compiledMaterialManager);
+
+			return;
+		}
+	}
+	original(This, frameBuilderContext);
+}
+
 //==========================================================================================================================
 
 void initMCHooks() {
@@ -256,4 +286,34 @@ void initMCHooks() {
 		//1.20.30.02
 		"48 89 5C 24 ? 55 56 57 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 49 8B C0"
 	);
+
+	if (TrySigHookNoWarning(mce_framebuilder_BgfxFrameBuilder_endFrame, "48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? B8 ? ? ? ? E8 ? ? ? ? 48 2B E0 0F 29 B4 24 ? ? ? ? 0F 29 BC 24 ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 4C 8B FA 48 89 55 ? 4C 8B F1")) {
+		//1.20.30.02
+		offsetToMaterialsManager = 768;
+	} else if (TrySigHookNoWarning(mce_framebuilder_BgfxFrameBuilder_endFrame, "48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? B8 ? ? ? ? E8 ? ? ? ? 48 2B E0 0F 29 B4 24 ? ? ? ? 0F 29 BC 24 ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 4C 8B EA")) {
+		//1.20.60.04
+		offsetToMaterialsManager = 816;
+	} else {
+		printf("Failed to hook mce::framebuilder::BgfxFrameBuilder::endFrame\n");
+	}
+
+	discardFrame = (PFN_mce_framebuilder_BgfxFrameBuilder_discardFrame)FindSignatures(
+		//1.20.30.02
+		"48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 44 24 ? 0F B6 EA 48 8B F1",
+		//1.20.30.21 preview
+		"48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 84 24 ? ? ? ? 0F B6 EA 48 8B F1 0F 57 C0"
+	);
+	if (!discardFrame) {
+		printf("mce::framebuilder::BgfxFrameBuilder::discardFrame not found\n");
+	}
+
+	freeShaderBlobs = (PFN_dragon_materials_CompiledMaterialManager_freeShaderBlobs)FindSignatures(
+		//1.20.1.02
+		"48 89 74 24 ? 57 48 83 EC ? 48 8B F9 48 83 C1 ? FF 15 ? ? ? ? 85 C0"
+	);
+	if (!freeShaderBlobs) {
+		printf("dragon::materials::CompiledMaterialManager::freeShaderBlobs not found\n");
+	}
+
+	Options::reloadShadersAvailable = offsetToMaterialsManager >= 0 && discardFrame && freeShaderBlobs;
 }

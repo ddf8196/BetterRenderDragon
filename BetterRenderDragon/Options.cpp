@@ -24,9 +24,13 @@ bool Options::disableRendererContextD3D12RTX = false;
 
 bool Options::materialBinLoaderEnabled = true;
 bool Options::redirectShaders = true;
-int Options::uikey = ImGuiKey_F6;
+bool Options::reloadShadersAvailable = false;
+std::atomic_bool Options::reloadShaders = false;
 
 bool Options::customUniformsEnabled = false;
+
+int Options::uiKey = ImGuiKey_F6;
+int Options::reloadShadersKey = ImGuiKey_R;
 
 std::atomic_bool Options::dirty = false;
 
