@@ -7,6 +7,7 @@ Enhancement Mod for the RenderDragon Engine of _**Minecraft: Bedrock Edition**_
 * Enable deferred rendering
 * Disable raytracing for better performance
 * Loads RenderDragon shaders from the resource pack
+* Hot reload RenderDragon shaders
 * Configurable ImGui
 
 ## Support Versions
@@ -27,9 +28,8 @@ _**0. YOU HAVE TO DO THIS EVERYTIME YOU WANT TO USE BRD!**_
 ### Usage
 * Press **`F6`** to show or hide the BetterRenderDragon Menu!
 
-### Vanilla2Deferred
-* Press **`Ctrl`** + **`;`** to turn deferred rendering on or off
-* Running Deferred Rendering requires a RayTracing resource pack to be on!
+### MaterialBinLoader
+* Press **`R`** to reload shaders
 
 ## Minimum requirements
 * Direct3D 11 (cannot enable deferred rendering)
