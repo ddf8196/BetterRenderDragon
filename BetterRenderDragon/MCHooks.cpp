@@ -166,23 +166,31 @@ PFN_dragon_materials_CompiledMaterialManager_freeShaderBlobs freeShaderBlobs = n
 
 int offsetToMaterialsManager = -1;
 
-DeclareHook(mce_framebuilder_BgfxFrameBuilder_endFrame, void, uintptr_t This, uintptr_t frameBuilderContext) {
-	if (Options::reloadShadersAvailable && Options::reloadShaders) {
-		Options::reloadShaders = false;
-
-		uintptr_t compiledMaterialManager = *(uintptr_t*)(*(uintptr_t*)(This + 40) + 16) + 768;
-		uintptr_t mExtractor = *(uintptr_t*)(This + 32);
+bool discardFrameAndClearShaderCaches(uintptr_t bgfxFrameBuilder) {
+	uintptr_t compiledMaterialManager = *(uintptr_t*)(*(uintptr_t*)(bgfxFrameBuilder + 40) + 16) + 768;
+	uintptr_t mExtractor = *(uintptr_t*)(bgfxFrameBuilder + 32);
 		MaterialResourceManager* mMaterialsManager = *(MaterialResourceManager**)(mExtractor + offsetToMaterialsManager);
 
 		if (discardFrame && freeShaderBlobs && mMaterialsManager) {
-			discardFrame(This, true);
+		discardFrame(bgfxFrameBuilder, true);
 
 			mMaterialsManager->forceTrim();
 			freeShaderBlobs(compiledMaterialManager);
 			freeShaderBlobs(compiledMaterialManager);
 
-			return;
-		}
+		return true;
+	}
+	return false;
+}
+
+DeclareHook(mce_framebuilder_BgfxFrameBuilder_endFrame, void, uintptr_t This, uintptr_t frameBuilderContext) {
+	bool clear = false;
+	if (Options::reloadShadersAvailable && Options::reloadShaders) {
+		Options::reloadShaders = false;
+		clear = true;
+	}
+	if (clear && discardFrameAndClearShaderCaches(This)) {
+		return;
 	}
 	original(This, frameBuilderContext);
 }
