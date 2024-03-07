@@ -213,6 +213,7 @@ void updateImGui() {
 				ImGui::Text("V1.3.6\n Support 1.20.40 and 1.20.50\n Added Force Enable Deferred Technical Preview option");
 				ImGui::Text("V1.3.7\n Support 1.20.60.23 preview\n");
 				ImGui::Text("V1.4.0\n Added Reload shaders button\n");
+				ImGui::Text("V1.4.1\n Support 1.20.80.20 preview and 1.20.80.21 preview\n");
 			}
 			ImGui::End();
 		}
