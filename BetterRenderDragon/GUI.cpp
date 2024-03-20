@@ -208,12 +208,13 @@ void updateImGui() {
 				ImGui::SetNextWindowFocus();
 			if (ImGui::Begin("BetterRenderDragon - Changelog", &showChangelog)) {
 				ImGui::Text("V1.3.3\n Support 1.20.1");
-				ImGui::Text("V1.3.4\n Support 1.20.10\n No longer support version below 1.20.10 ");
+				ImGui::Text("V1.3.4\n Support 1.20.10\n No longer support version below 1.20.10");
 				ImGui::Text("V1.3.5\n Support 1.20.32\n Fixed ImGui flickering on some devices\n Removed Vanilla2Deferred option");
 				ImGui::Text("V1.3.6\n Support 1.20.40 and 1.20.50\n Added Force Enable Deferred Technical Preview option");
-				ImGui::Text("V1.3.7\n Support 1.20.60.23 preview\n");
-				ImGui::Text("V1.4.0\n Added Reload shaders button\n");
-				ImGui::Text("V1.4.1\n Support 1.20.80.20 preview and 1.20.80.21 preview\n");
+				ImGui::Text("V1.3.7\n Support 1.20.60.23 preview");
+				ImGui::Text("V1.4.0\n Added Reload shaders button");
+				ImGui::Text("V1.4.1\n Support 1.20.80.20 preview and 1.20.80.21 preview");
+				ImGui::Text("V1.4.2\n Support 1.20.71.01");
 			}
 			ImGui::End();
 		}
