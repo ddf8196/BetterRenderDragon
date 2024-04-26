@@ -10,32 +10,34 @@
 #include "Util.h"
 #include "imgui/imgui.h"
 
-bool Options::showImGui = true;
+namespace Options {
+	bool showImGui = true;
 
-bool Options::performanceEnabled = true;
-bool Options::windowSettingsEnabled = true;
+	bool performanceEnabled = true;
+	bool windowSettingsEnabled = true;
 
-bool Options::vanilla2DeferredAvailable = true;
-bool Options::vanilla2DeferredEnabled = true;
-bool Options::deferredRenderingEnabled = false;
-bool Options::newVideoSettingsAvailable = false;
-bool Options::forceEnableDeferredTechnicalPreview = false;
-bool Options::disableRendererContextD3D12RTX = false;
+	bool vanilla2DeferredAvailable = true;
+	bool vanilla2DeferredEnabled = true;
+	bool deferredRenderingEnabled = false;
+	bool newVideoSettingsAvailable = false;
+	bool forceEnableDeferredTechnicalPreview = false;
+	bool disableRendererContextD3D12RTX = false;
 
-bool Options::materialBinLoaderEnabled = true;
-bool Options::redirectShaders = true;
-bool Options::reloadShadersAvailable = false;
-std::atomic_bool Options::reloadShaders = false;
+	bool materialBinLoaderEnabled = true;
+	bool redirectShaders = true;
+	bool reloadShadersAvailable = false;
+	std::atomic_bool reloadShaders = false;
 
-bool Options::customUniformsEnabled = false;
+	bool customUniformsEnabled = false;
 
-int Options::uiKey = ImGuiKey_F6;
-int Options::reloadShadersKey = ImGuiKey_R;
+	int uiKey = ImGuiKey_F6;
+	int reloadShadersKey = ImGuiKey_None;
 
-std::atomic_bool Options::dirty = false;
+	std::atomic_bool dirty = false;
 
-std::string Options::optionsDir;
-std::string Options::optionsFile;
+	std::string optionsDir;
+	std::string optionsFile;
+}
 
 using nlohmann::json;
 

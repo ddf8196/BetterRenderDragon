@@ -2,38 +2,36 @@
 #include <string>
 #include <atomic>
 
-class Options {
-public:
-	static bool showImGui;
+namespace Options {
+	extern bool showImGui;
 
-	static bool performanceEnabled;
+	extern bool performanceEnabled;
 
-	static bool windowSettingsEnabled;
+	extern bool windowSettingsEnabled;
 
-	static bool vanilla2DeferredAvailable;
-	static bool vanilla2DeferredEnabled;
-	static bool deferredRenderingEnabled;
-	static bool newVideoSettingsAvailable;
-	static bool forceEnableDeferredTechnicalPreview;
-	static bool disableRendererContextD3D12RTX;
+	extern bool vanilla2DeferredAvailable;
+	extern bool vanilla2DeferredEnabled;
+	extern bool deferredRenderingEnabled;
+	extern bool newVideoSettingsAvailable;
+	extern bool forceEnableDeferredTechnicalPreview;
+	extern bool disableRendererContextD3D12RTX;
 
-	static bool materialBinLoaderEnabled;
-	static bool redirectShaders;
-	static bool reloadShadersAvailable;
-	static std::atomic_bool reloadShaders;
+	extern bool materialBinLoaderEnabled;
+	extern bool redirectShaders;
+	extern bool reloadShadersAvailable;
+	extern std::atomic_bool reloadShaders;
 
-	static bool customUniformsEnabled;
+	extern bool customUniformsEnabled;
 
-	static int uiKey;
-	static int reloadShadersKey;
+	extern int uiKey;
+	extern int reloadShadersKey;
 
-	static std::atomic_bool dirty;
+	extern std::atomic_bool dirty;
 
-	static bool init();
-	static bool load();
-	static bool save();
+	extern std::string optionsDir;
+	extern std::string optionsFile;
 
-private:
-	static std::string optionsDir;
-	static std::string optionsFile;
+	extern bool init();
+	extern bool load();
+	extern bool save();
 };
