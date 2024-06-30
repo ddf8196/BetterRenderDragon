@@ -33,7 +33,7 @@ void updateImGui() {
 		auto& io = ImGui::GetIO();
 		
 		ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-		if (ImGui::Begin("BetterRenderDragon", &Options::showImGui, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize)) {
+		if (ImGui::Begin("BetterRenderDragon", Options::showImGui.ptr(), ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize)) {
 			if (ImGui::BeginMenuBar()) {
 				if (ImGui::BeginMenu("View")) {
 					if (ImGui::MenuItem("Open Module Manager")) {
@@ -101,10 +101,10 @@ void updateImGui() {
 					ImGui::BeginDisabled();
 				ImGui::Indent();
 				if (Options::newVideoSettingsAvailable)
-					ImGui::Checkbox("Force Enable Deferred Technical Preview", &Options::forceEnableDeferredTechnicalPreview);
+					ImGui::Checkbox("Force Enable Deferred Technical Preview", Options::forceEnableDeferredTechnicalPreview.ptr());
 				else
-					ImGui::Checkbox("Enable Deferred Rendering", &Options::deferredRenderingEnabled);
-				ImGui::Checkbox("Disable RTX (Requires restart)", &Options::disableRendererContextD3D12RTX);
+					ImGui::Checkbox("Enable Deferred Rendering", Options::deferredRenderingEnabled.ptr());
+				ImGui::Checkbox("Disable RTX (Requires restart)", Options::disableRendererContextD3D12RTX.ptr());
 				ImGui::Unindent();
 				if (!Options::vanilla2DeferredAvailable)
 					ImGui::EndDisabled();
@@ -112,7 +112,7 @@ void updateImGui() {
 
 			if (Options::materialBinLoaderEnabled && ImGui::CollapsingHeader("MaterialBinLoader", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Indent();
-				ImGui::Checkbox("Load shaders from resource pack", &Options::redirectShaders);
+				ImGui::Checkbox("Load shaders from resource pack", Options::redirectShaders.ptr());
 				if (Options::reloadShadersAvailable) {
 					bool disable = Options::reloadShaders;
 					if (disable)
@@ -167,25 +167,25 @@ void updateImGui() {
 
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0); ImGui::Text("Performance");
-					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##1", &Options::performanceEnabled);
+					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##1", Options::performanceEnabled.ptr());
 
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0); ImGui::Text("Vanilla2Deferred");
-					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##2", &Options::vanilla2DeferredEnabled);
+					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##2", Options::vanilla2DeferredEnabled.ptr());
 
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0); ImGui::Text("MaterialBinLoader");
-					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##3", &Options::materialBinLoaderEnabled);
+					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##3", Options::materialBinLoaderEnabled.ptr());
 
 #if 0
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0); ImGui::Text("Settings");
-					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##4", &Options::windowSettingsEnabled);
+					ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##4", &Options::windowSettingsEnabled.ptr());
 #endif
 
 					//ImGui::TableNextRow();
 					//ImGui::TableSetColumnIndex(0); ImGui::Text("CustomUniforms");
-					//ImGui::TableSetColumnIndex(1); ImGui::Checkbox("", &Options::customUniformsEnabled);
+					//ImGui::TableSetColumnIndex(1); ImGui::Checkbox("", &Options::customUniformsEnabled.ptr());
 
 					ImGui::EndTable();
 				}
@@ -235,67 +235,20 @@ void updateImGui() {
 bool isChangingUIKey = false;
 bool justChangedKey = false;
 
-//std::atomic_bool running = true;
-//DWORD WINAPI trySaveOptions(LPVOID lpThreadParameter) {
-//	while (running) {
-//		if (Options::dirty) {
-//			Options::save();
-//			Options::dirty = false;
-//		}
-//		Sleep(1000);
-//	}
-//	return 0;
-//}
-
 void updateOptions() {
 	static float saveTimer = 0.0f;
 
-	static bool showImGui = Options::showImGui;
-	static bool performanceEnabled = Options::performanceEnabled;
-	static bool vanilla2DeferredEnabled = Options::vanilla2DeferredEnabled;
-	static bool deferredRenderingEnabled = Options::deferredRenderingEnabled;
-	static bool forceEnableDeferredTechnicalPreview = Options::forceEnableDeferredTechnicalPreview;
-	static bool disableRendererContextD3D12RTX = Options::disableRendererContextD3D12RTX;
-	static bool materialBinLoaderEnabled = Options::materialBinLoaderEnabled;
-	static bool redirectShaders = Options::redirectShaders;
-	static bool customUniformsEnabled = Options::customUniformsEnabled;
-	static bool windowSettingsEnabled = Options::windowSettingsEnabled;
-
-	if (showImGui != Options::showImGui
-		|| performanceEnabled != Options::performanceEnabled
-		|| vanilla2DeferredEnabled != Options::vanilla2DeferredEnabled
-		|| deferredRenderingEnabled != Options::deferredRenderingEnabled
-		|| forceEnableDeferredTechnicalPreview != Options::forceEnableDeferredTechnicalPreview
-		|| disableRendererContextD3D12RTX != Options::disableRendererContextD3D12RTX
-		|| materialBinLoaderEnabled != Options::materialBinLoaderEnabled
-		|| redirectShaders != Options::redirectShaders
-		|| customUniformsEnabled != Options::customUniformsEnabled
-		|| windowSettingsEnabled != Options::windowSettingsEnabled) {
-
-		Options::dirty = true;
+	if (Options::isDirty()) {
 		saveTimer = 3.0f;
-
-		showImGui = Options::showImGui;
-		performanceEnabled = Options::performanceEnabled;
-		vanilla2DeferredEnabled = Options::vanilla2DeferredEnabled;
-		deferredRenderingEnabled = Options::deferredRenderingEnabled;
-		forceEnableDeferredTechnicalPreview = Options::forceEnableDeferredTechnicalPreview;
-		disableRendererContextD3D12RTX = Options::disableRendererContextD3D12RTX;
-		materialBinLoaderEnabled = Options::materialBinLoaderEnabled;
-		redirectShaders = Options::redirectShaders;
-		customUniformsEnabled = Options::customUniformsEnabled;
-		windowSettingsEnabled = Options::windowSettingsEnabled;
 	}
+	Options::record();
 
 	//TODO: Put it on a separate thread
 	if (saveTimer > 0.0f) {
 		saveTimer -= ImGui::GetIO().DeltaTime;
 		if (saveTimer <= 0.0f) {
 			saveTimer = 0.0f;
-			if (Options::dirty) {
-				Options::save();
-				Options::dirty = false;
-			}
+			Options::save();
 		}
 	}
 }
@@ -303,14 +256,14 @@ void updateOptions() {
 void updateKeys() {
 	static bool prevToggleImGui = false;
 
-	bool toggleImGui = ImGui::IsKeyPressed((ImGuiKey)Options::uiKey) && !justChangedKey;
+	bool toggleImGui = ImGui::IsKeyPressed((ImGuiKey)Options::uiKey.get()) && !justChangedKey;
 	if (!toggleImGui)
 		justChangedKey = false;
 	if (toggleImGui && !prevToggleImGui)
 		Options::showImGui = !Options::showImGui;
 	prevToggleImGui = toggleImGui;
 
-	if (Options::reloadShadersAvailable && !Options::reloadShaders && ImGui::IsKeyPressed((ImGuiKey)Options::reloadShadersKey)) {
+	if (Options::reloadShadersAvailable && !Options::reloadShaders && ImGui::IsKeyPressed((ImGuiKey)Options::reloadShadersKey.get())) {
 		Options::reloadShaders = true;
 	}
 }

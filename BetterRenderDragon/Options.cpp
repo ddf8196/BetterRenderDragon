@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 #include <fstream>
 #include <filesystem>
 
@@ -11,29 +12,27 @@
 #include "imgui/imgui.h"
 
 namespace Options {
-	bool showImGui = true;
+	Option<bool> showImGui = true;
 
-	bool performanceEnabled = true;
-	bool windowSettingsEnabled = true;
+	Option<bool> performanceEnabled = true;
+	Option<bool> windowSettingsEnabled = true;
 
 	bool vanilla2DeferredAvailable = true;
-	bool vanilla2DeferredEnabled = true;
-	bool deferredRenderingEnabled = false;
 	bool newVideoSettingsAvailable = false;
-	bool forceEnableDeferredTechnicalPreview = false;
-	bool disableRendererContextD3D12RTX = false;
+	Option<bool> vanilla2DeferredEnabled = true;
+	Option<bool> deferredRenderingEnabled = false;
+	Option<bool> forceEnableDeferredTechnicalPreview = false;
+	Option<bool> disableRendererContextD3D12RTX = false;
 
-	bool materialBinLoaderEnabled = true;
-	bool redirectShaders = true;
+	Option<bool> materialBinLoaderEnabled = true;
+	Option<bool> redirectShaders = true;
 	bool reloadShadersAvailable = false;
 	std::atomic_bool reloadShaders = false;
 
-	bool customUniformsEnabled = false;
+	Option<bool> customUniformsEnabled = false;
 
-	int uiKey = ImGuiKey_F6;
-	int reloadShadersKey = ImGuiKey_None;
-
-	std::atomic_bool dirty = false;
+	Option<int> uiKey = ImGuiKey_F6;
+	Option<int> reloadShadersKey = ImGuiKey_None;
 
 	std::string optionsDir;
 	std::string optionsFile;
@@ -94,7 +93,21 @@ std::string getLocalStatePath() {
 	return wstringToString(pathWstr);
 }
 
+std::vector<IOption*> options;
 bool Options::init() {
+	options.push_back(&showImGui);
+	options.push_back(&performanceEnabled);
+	options.push_back(&windowSettingsEnabled);
+	options.push_back(&vanilla2DeferredEnabled);
+	options.push_back(&deferredRenderingEnabled);
+	options.push_back(&forceEnableDeferredTechnicalPreview);
+	options.push_back(&disableRendererContextD3D12RTX);
+	options.push_back(&materialBinLoaderEnabled);
+	options.push_back(&redirectShaders);
+	options.push_back(&customUniformsEnabled);
+	options.push_back(&uiKey);
+	options.push_back(&reloadShadersKey);
+
 	if (optionsDir.empty()) {
 		std::string localStatePath = getLocalStatePath();
 		//printf("%s\n", localStatePath.c_str());
@@ -174,26 +187,41 @@ bool Options::load() {
 
 bool Options::save() {
 	json data;
-	data["showImGui"] = showImGui;
+	data["showImGui"] = showImGui.get();
 
-	data["performanceEnabled"] = performanceEnabled;
+	data["performanceEnabled"] = performanceEnabled.get();
 
 #if 0
-	data["windowSettingsEnabled"] = windowSettingsEnabled;
-	data["uikey"] = uikey;
+	data["windowSettingsEnabled"] = windowSettingsEnabled.get();
+	data["uikey"] = uikey.get();
 #endif
 
-	data["vanilla2DeferredEnabled"] = vanilla2DeferredEnabled;
-	data["deferredRenderingEnabled"] = deferredRenderingEnabled;
-	data["forceEnableDeferredTechnicalPreview"] = forceEnableDeferredTechnicalPreview;
-	data["disableRendererContextD3D12RTX"] = disableRendererContextD3D12RTX;
+	data["vanilla2DeferredEnabled"] = vanilla2DeferredEnabled.get();
+	data["deferredRenderingEnabled"] = deferredRenderingEnabled.get();
+	data["forceEnableDeferredTechnicalPreview"] = forceEnableDeferredTechnicalPreview.get();
+	data["disableRendererContextD3D12RTX"] = disableRendererContextD3D12RTX.get();
 
-	data["materialBinLoaderEnabled"] = materialBinLoaderEnabled;
-	data["redirectShaders"] = redirectShaders;
+	data["materialBinLoaderEnabled"] = materialBinLoaderEnabled.get();
+	data["redirectShaders"] = redirectShaders.get();
 
-	//data["customUniformsEnabled"] = customUniformsEnabled;
+	//data["customUniformsEnabled"] = customUniformsEnabled.get();
 
 	std::ofstream ofs(optionsFile, std::ofstream::binary);
 	ofs << std::setw(4) << data << std::endl;
 	return true;
+}
+
+void Options::record() {
+	for (auto opt : options) {
+		opt->record();
+	}
+}
+
+bool Options::isDirty() {
+	for (auto opt : options) {
+		if (opt->isChanged()) {
+			return true;
+		}
+	}
+	return false;
 }

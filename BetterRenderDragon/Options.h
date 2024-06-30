@@ -2,31 +2,75 @@
 #include <string>
 #include <atomic>
 
+class IOption {
+public:
+	virtual void record() = 0;
+	virtual bool isChanged() = 0;
+};
+
+template<typename T>
+class Option : public IOption {
+public:
+	Option() {
+	}
+	Option(const T& value) : value(value), prevValue(value) {
+	}
+	virtual void record() override {
+		prevValue = value;
+	}
+	virtual bool isChanged() override {
+		return value != prevValue;
+	}
+	T& get() {
+		return value;
+	}
+	const T& get() const {
+		return value;
+	}
+	void set(const T& value) {
+		this->value = value;
+	}
+	T* ptr() {
+		return &this->value;
+	}
+	const T* ptr() const {
+		return &this->value;
+	}
+	operator T() {
+		return value;
+	}
+	Option<T>& operator =(const T& value) {
+		this->value = value;
+		return *this;
+	}
+private:
+	T value;
+	T prevValue;
+};
+
 namespace Options {
-	extern bool showImGui;
+	extern Option<bool> showImGui;
 
-	extern bool performanceEnabled;
+	extern Option<bool> performanceEnabled;
 
-	extern bool windowSettingsEnabled;
+	extern Option<bool> windowSettingsEnabled;
 
 	extern bool vanilla2DeferredAvailable;
-	extern bool vanilla2DeferredEnabled;
-	extern bool deferredRenderingEnabled;
 	extern bool newVideoSettingsAvailable;
-	extern bool forceEnableDeferredTechnicalPreview;
-	extern bool disableRendererContextD3D12RTX;
+	extern Option<bool> vanilla2DeferredEnabled;
+	extern Option<bool> deferredRenderingEnabled;
+	extern Option<bool> forceEnableDeferredTechnicalPreview;
+	extern Option<bool> disableRendererContextD3D12RTX;
 
-	extern bool materialBinLoaderEnabled;
-	extern bool redirectShaders;
+	extern Option<bool> materialBinLoaderEnabled;
+	extern Option<bool> redirectShaders;
 	extern bool reloadShadersAvailable;
 	extern std::atomic_bool reloadShaders;
 
-	extern bool customUniformsEnabled;
+	extern Option<bool> customUniformsEnabled;
 
-	extern int uiKey;
-	extern int reloadShadersKey;
-
-	extern std::atomic_bool dirty;
+	extern Option<int> uiKey;
+	extern Option<int> reloadShadersKey;
 
 	extern std::string optionsDir;
 	extern std::string optionsFile;
@@ -34,4 +78,6 @@ namespace Options {
 	extern bool init();
 	extern bool load();
 	extern bool save();
+	extern void record();
+	extern bool isDirty();
 };
