@@ -169,14 +169,14 @@ int offsetToMaterialsManager = -1;
 bool discardFrameAndClearShaderCaches(uintptr_t bgfxFrameBuilder) {
 	uintptr_t compiledMaterialManager = *(uintptr_t*)(*(uintptr_t*)(bgfxFrameBuilder + 40) + 16) + 768;
 	uintptr_t mExtractor = *(uintptr_t*)(bgfxFrameBuilder + 32);
-		MaterialResourceManager* mMaterialsManager = *(MaterialResourceManager**)(mExtractor + offsetToMaterialsManager);
+	MaterialResourceManager* mMaterialsManager = *(MaterialResourceManager**)(mExtractor + offsetToMaterialsManager);
 
-		if (discardFrame && freeShaderBlobs && mMaterialsManager) {
+	if (discardFrame && freeShaderBlobs && mMaterialsManager) {
 		discardFrame(bgfxFrameBuilder, true);
 
-			mMaterialsManager->forceTrim();
-			freeShaderBlobs(compiledMaterialManager);
-			freeShaderBlobs(compiledMaterialManager);
+		mMaterialsManager->forceTrim();
+		freeShaderBlobs(compiledMaterialManager);
+		freeShaderBlobs(compiledMaterialManager);
 
 		return true;
 	}
@@ -306,8 +306,12 @@ void initMCHooks() {
 	if (TrySigHookNoWarning(mce_framebuilder_BgfxFrameBuilder_endFrame, "48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? B8 ? ? ? ? E8 ? ? ? ? 48 2B E0 0F 29 B4 24 ? ? ? ? 0F 29 BC 24 ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 4C 8B FA 48 89 55 ? 4C 8B F1")) {
 		//1.20.30.02
 		offsetToMaterialsManager = 768;
-	} else if (TrySigHookNoWarning(mce_framebuilder_BgfxFrameBuilder_endFrame, "48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? B8 ? ? ? ? E8 ? ? ? ? 48 2B E0 0F 29 B4 24 ? ? ? ? 0F 29 BC 24 ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 4C 8B EA")) {
+	} else if (TrySigHookNoWarning(mce_framebuilder_BgfxFrameBuilder_endFrame, 
 		//1.20.60.04
+		"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? B8 ? ? ? ? E8 ? ? ? ? 48 2B E0 0F 29 B4 24 ? ? ? ? 0F 29 BC 24 ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 4C 8B EA",
+		//1.21.0.03
+		"48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? B8 ? ? ? ? E8 ? ? ? ? 48 2B E0 0F 29 B4 24 ? ? ? ? 0F 29 BC 24 ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 48 8B F2 48 89 55"
+	)) {
 		offsetToMaterialsManager = 816;
 	} else {
 		printf("Failed to hook mce::framebuilder::BgfxFrameBuilder::endFrame\n");
