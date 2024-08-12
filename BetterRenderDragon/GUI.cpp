@@ -216,6 +216,7 @@ void updateImGui() {
 				ImGui::Text("V1.4.1\n Support 1.20.80.20 preview and 1.20.80.21 preview");
 				ImGui::Text("V1.4.2\n Support 1.20.71.01");
 				ImGui::Text("V1.4.3\n Support 1.20.80.05\n Removed key binding for reload shaders");
+                ImGui::Text("V1.4.4\n Support 1.21.2.02\n Added key binding for reload shaders");
 			}
 			ImGui::End();
 		}

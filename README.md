@@ -1,29 +1,57 @@
-简体中文 | [English](README_US.md) 
+# English | [简体中文](README_CN.md)
 
-# BetterRenderDragon
-为渲染龙添加更多功能
+## BetterRenderDragon
 
-## 功能
-* 启用延迟渲染
-* 禁用光线追踪以获得更好的性能
-* 从资源包加载渲染龙着色器
-* 热重载渲染龙着色器
-* 可配置功能的ImGui
+Enhancement Mod for the RenderDragon Engine of _**Minecraft: Bedrock Edition**_
 
-## 支持的版本
-MCBE正式版或预览版1.20.10以上
+## Functions
 
-## 使用
-1. 安装MCBE 1.20.10及以上版本
-2. 从[Releases](https://github.com/ddf8196/BetterRenderDragon/releases/latest)中下载`BetterRenderDragon.zip`并解压
-3. 双击`LaunchMinecraft.bat`启动正式版MC, 或双击`LaunchMinecraftPreview.bat`启动预览版MC
+* Enable deferred rendering
+* Disable raytracing for better performance
+* Loads RenderDragon shaders from the resource pack
+* Hot reload RenderDragon shaders
+* Configurable ImGui
 
-### ImGui
-* `F6` 开启或关闭ImGui显示
+## Support Versions
 
-### MaterialBinLoader
-* `R` 重新加载着色器
+MCBE Official version 1.20.30+
 
-## 最低要求
-* Direct3D 11 (无法启用延迟渲染)
-* 启用延迟渲染最低需要Direct3D 12
+## Installation
+
+_**YOU HAVE TO DO THIS EVERYTIME YOU WANT TO USE BRD!**_
+
+* Not doing these steps wll result in Vanilla Minecraft being launched!
+
+1. **Check your Minecraft Version**
+   * BetterRenderDragon currently supports stable versions 1.20.30+
+      **(You do need a copy of Minecraft on your computer!)**
+2. **Get BetterRenderDragon!**
+   * Download BetterRenderDragon From [here](https://github.com/ddf8196/BetterRenderDragon/releases/latest). For Beta version please download from [here](https://github.com/ddf8196/BetterRenderDragon/actions)
+3. **Unzip the file!**
+   * Unzip the file `BetterRenderDragon.zip` to an empty folder!
+4. **Start It!**
+   * In the BetterRenderDragon folder, double-Click _**`LaunchMinecraft.bat`**_ to launch Stable versions, or Double-click _**`LaunchMinecraftPreview.bat`**_ to launch Preview versions.
+
+## Usage
+
+* Press **`F6`** to show or hide the BetterRenderDragon Menu!
+
+## Minimum requirements
+
+* Direct3D 11 (cannot enable deferred rendering)
+* To enable deferred rendering, the minimum requirement is Direct3D 12(FL 12.1)
+
+## Troubleshooting
+
+* My antivirus software blocked BetterRenderDragon, what should I do?
+* **You can add BetterRenderDragon to your antivirus software's whitelist.**. Just the software doesnt have a valid signature.
+
+* I can't find the BetterRenderDragon Menu!
+* **Press `F6` to show or hide the BetterRenderDragon Menu**
+
+* FindFirstFileW failed: error [00000002] The system cannot find the file specified.
+* Most likely is your antivirus deleted the BetterRenderDragon dll file inside dlls folder, you can add BetterRenderDragon to your antivirus software's whitelist.
+
+## Note
+
+**This Program is not affiliated with Mojang Studios**.
