@@ -20,7 +20,7 @@ MCBE Official version 1.20.30+
 
 _**YOU HAVE TO DO THIS EVERYTIME YOU WANT TO USE BRD!**_
 
-* Not doing these steps wll result in Vanilla Minecraft being launched!
+* Not doing these steps will result in Vanilla Minecraft being launched!
 
 1. **Check your Minecraft Version**
    * BetterRenderDragon currently supports stable versions 1.20.30+
