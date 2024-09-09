@@ -6,10 +6,9 @@ Enhancement Mod for the RenderDragon Engine of _**Minecraft: Bedrock Edition**_
 
 ## Functions
 
-* Enable deferred rendering
-* Disable raytracing for better performance
+* Enable Deferred Rendering
+* Disable Raytracing for better performance
 * Loads RenderDragon shaders from the resource pack
-* Hot reload RenderDragon shaders
 * Configurable ImGui
 
 ## Support Versions
@@ -20,7 +19,7 @@ MCBE Official version 1.20.30+
 
 _**YOU HAVE TO DO THIS EVERYTIME YOU WANT TO USE BRD!**_
 
-* Not doing these steps wll result in Vanilla Minecraft being launched!
+* Not doing these steps will result in Vanilla Minecraft being launched!
 
 1. **Check your Minecraft Version**
    * BetterRenderDragon currently supports stable versions 1.20.30+
@@ -39,7 +38,7 @@ _**YOU HAVE TO DO THIS EVERYTIME YOU WANT TO USE BRD!**_
 ## Minimum requirements
 
 * Direct3D 11 (cannot enable deferred rendering)
-* To enable deferred rendering, the minimum requirement is Direct3D 12(FL 12.1)
+* To enable deferred rendering, the minimum requirement is Direct3D 12(FL 12_0)
 
 ## Troubleshooting
 
