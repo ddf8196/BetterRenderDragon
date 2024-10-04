@@ -28,7 +28,7 @@
    * BetterRenderDragon은 현재 1.20.30+을 지원합니다+
       **(컴퓨터에 마인크래프트가 설치되어 있어야 합니다.)**
 2. **BetterRenderDragon을 만나보세요!**
-   * BetterRenderDragon From [https://github.com/hajs2011/BetterRenderDragon/releases/latest) ](https://github.com/ddf8196/BetterRenderDragon/actions) 에서 다운로드하세요. 베타 버전의 경우 [here ]에서 다운로드하세요
+   * BetterRenderDragon From [https://github.com/hajs2011/BetterRenderDragon/releases/] 에서 다운로드하세요.
 3. **압축파일를 여세요!**
    * 빈 폴더에 'BetterRenderDragon.zip' 압측을 푸세요!
 4. **시작하는 방법**
