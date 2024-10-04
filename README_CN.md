@@ -1,4 +1,4 @@
-简体中文 | [English](README.md) | 한국어 https://github.com/hajs110208/BetterRenderDragon/blob/main/README_KO.md
+简体中文 | [English](README.md) | 한국어 <https://github.com/hajs110208/BetterRenderDragon/blob/main/README_KO.md>
 
 # BetterRenderDragon
 为渲染龙添加更多功能
