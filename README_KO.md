@@ -1,7 +1,7 @@
 
 
 
-# 영어 | [简体中文](README_CN.md) | 한국어
+# [영어](README.md) | [简体中文](README_CN.md) | 한국어
 
 ## BetterRenderDragon
 
