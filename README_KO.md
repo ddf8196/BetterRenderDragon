@@ -32,7 +32,7 @@
 3. **압축파일를 여세요!**
    * 빈 폴더에 'BetterRenderDragon.zip' 압측을 푸세요!
 4. **시작하는 방법**
-   * BetterRenderDragon 폴더에서 _**'LaunchMinecraft.bat'을 실행하여 릴리즈 버전을 실행하거나, _**'LaunchMinecraftPreview.bat'을 두 번 클릭하여 프리뷰 버전을 실행합니다.
+   * BetterRenderDragon 폴더에서 **'LaunchMinecraft.bat'을 실행하여 릴리즈 버전을 실행하거나, **'LaunchMinecraftPreview.bat'을 두 번 클릭하여 프리뷰 버전을 실행합니다.
 
 ## 사용량
 
