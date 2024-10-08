@@ -1,4 +1,4 @@
-# English | [简体中文](README_CN.md)
+# English | [简体中文](README_CN.md) | [한국어](README_KO.md)
 
 ## BetterRenderDragon
 
